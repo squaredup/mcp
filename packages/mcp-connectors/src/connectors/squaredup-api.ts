@@ -1,15 +1,39 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+interface SquaredUpTile {
+    static?: boolean;
+    w: number;
+    moved?: boolean;
+    h: number;
+    x: number;
+    y: number;
+    i: string;
+    config: unknown;
+    z?: number;
+}
+
+interface SquaredUpDashboardContent {
+    _type: 'layout/grid';
+    contents: SquaredUpTile[];
+}
+
 interface SquaredUpDashboard {
-    id: string;
-    title: string;
+    content?: SquaredUpDashboardContent;
+    dashboardId?: string;
     description: string;
+    displayName: string;
+    id?: string;
     workspaceId: string;
 }
 
-interface SquaredUpDashboardImage {
+interface SquaredUpImageUrl {
     url: string;
+}
+
+export interface SquaredUpCredentials {
+    apiKey: string;
+    region: 'us' | 'eu';
 }
 
 class SquaredUpClient {
@@ -27,8 +51,9 @@ class SquaredUpClient {
         this.baseUrl = `https://${this.prefix}api.squaredup.com/api`;
     }
 
-    async getDashboards(): Promise<SquaredUpDashboard[]> {
+    async listDashboards(): Promise<SquaredUpDashboard[]> {
         const response = await fetch(`${this.baseUrl}/dashboards`, {
+            method: 'GET',
             headers: this.headers,
         });
 
@@ -36,28 +61,30 @@ class SquaredUpClient {
             throw new Error(`SquaredUp API error: ${response.status} ${response.statusText}`);
         }
 
-        const result = (await response.json()) as { data: SquaredUpDashboard[] };
-        return result.data;
+        const result = (await response.json()) as SquaredUpDashboard[];
+        return result.map((dashboard) => ({
+            dashboardId: dashboard.id,
+            displayName: dashboard.displayName,
+            description: `A dashboard with ID '${dashboard.id}' and workspace ID '${
+                dashboard.workspaceId
+            }', containing ${dashboard.content?.contents?.length ?? 'no'} tiles.`,
+            workspaceId: dashboard.workspaceId,
+        }));
     }
 
-    async getDashboardImage(workspaceId: string, dashboardId: string): Promise<SquaredUpDashboardImage> {
+    async getDashboardImage(workspaceId: string, dashboardId: string): Promise<SquaredUpImageUrl> {
         const response = await fetch(`${this.baseUrl}/generate/${workspaceId}/${dashboardId}`, {
-            headers: this.headers,
             method: 'POST',
+            headers: this.headers,
         });
 
         if (!response.ok) {
             throw new Error(`SquaredUp API error: ${response.status} ${response.statusText}`);
         }
 
-        const result = (await response.json()) as { data: string };
-        return { url: result.data };
+        const result = (await response.json()) as string;
+        return { url: result };
     }
-}
-
-export interface SquaredUpCredentials {
-    apiKey: string;
-    region: 'us' | 'eu';
 }
 
 export function createSquaredUpApiServer(credentials: SquaredUpCredentials): McpServer {
@@ -66,10 +93,10 @@ export function createSquaredUpApiServer(credentials: SquaredUpCredentials): Mcp
         version: '1.0.0',
     });
 
-    server.tool('squaredup_api_get_dashboards', 'Get all the dashboards in your organization', {}, async (_args) => {
+    server.tool('squaredup-api-list-dashboards', 'List all the dashboards in your organization', {}, async (_args) => {
         try {
             const client = new SquaredUpClient(credentials.apiKey, credentials.region);
-            const dashboards = await client.getDashboards();
+            const dashboards = await client.listDashboards();
             return {
                 content: [
                     {
@@ -91,8 +118,8 @@ export function createSquaredUpApiServer(credentials: SquaredUpCredentials): Mcp
     });
 
     server.tool(
-        'squaredup_api_get_dashboard_image',
-        'Get the image of a dashboard',
+        'squaredup-api-get-dashboard-image',
+        'Get an image of a dashboard',
         {
             workspaceId: z.string().describe('The ID of the workspace containing the dashboard'),
             dashboardId: z.string().describe('The ID of the dashboard to get the image of'),

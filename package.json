@@ -3,16 +3,16 @@
     "version": "1.0.0",
     "private": true,
     "description": "SquaredUp MCP Server and some dev/test utils",
-    "workspaces": [
-        "packages/*",
-        "apps/*"
-    ],
-    "type": "module",
-    "files": [
-        "dist",
-        "README.md",
-        "LICENSE"
-    ],
+    "workspaces": {
+        "packages": [
+            "packages/*",
+            "apps/*"
+        ],
+        "catalog": {
+            "@modelcontextprotocol/sdk": "^1.20.1",
+            "zod": "^4.1.12"
+        }
+    },
     "scripts": {
         "start": "turbo run start",
         "server": "turbo run spawn",
@@ -29,7 +29,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "^2.2.6",
-        "@types/node": "^24.7.2",
+        "@types/node": "^24.8.0",
         "@typescript/native-preview": "^7.0.0-dev.20251016.1",
         "husky": "^9.1.7",
         "lint-staged": "^16.2.4",

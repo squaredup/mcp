@@ -20,10 +20,10 @@
         "typecheck": "tsgo --noEmit"
     },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.20.1",
+        "@modelcontextprotocol/sdk": "catalog:",
         "@orama/orama": "^3.1.16",
         "modal": "^0.3.25",
-        "zod": "^4.1.12"
+        "zod": "catalog:"
     },
     "repository": {
         "type": "git",
