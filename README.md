@@ -63,7 +63,7 @@ Server runs at `http://localhost:3000/mcp`
 
 ## Available Connectors
 
-**Integrations:** `squaredup-api`
+**squaredup-api** - tools to work with dashboards and data
 
 ## License
 
