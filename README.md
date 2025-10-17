@@ -3,6 +3,7 @@
 This monorepo contains packages and apps built with TypeScript and Zod:
 
 **@squaredup/mcp-connectors** - Connectors for SquaredUp products and features
+
 **@squaredup/mcp-server** - An app for running an MCP Server locally
 
 ## Getting Started
