@@ -1,0 +1,21 @@
+{
+    "name": "@squaredup/mcp-server",
+    "version": "0.0.1",
+    "description": "An app for running a SquaredUp MCP Server locally",
+    "type": "module",
+    "scripts": {
+        "dev": "bun run --watch src/index.ts",
+        "start": "bun run src/index.ts",
+        "spawn": "bun run src/spawn-server.ts"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.18.0",
+        "@squaredup/mcp-connectors": "workspace:*",
+        "express": "^5.1.0",
+        "winston": "^3.17.0"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/node": "^24.8.0"
+    }
+}

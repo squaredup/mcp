@@ -1,0 +1,56 @@
+{
+    "name": "squaredup-mcp",
+    "version": "1.0.0",
+    "private": true,
+    "description": "SquaredUp MCP Server and some dev/test utils",
+    "workspaces": [
+        "packages/*",
+        "apps/*"
+    ],
+    "type": "module",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+    ],
+    "scripts": {
+        "start": "turbo run start",
+        "server": "turbo run spawn",
+        "dev": "turbo run dev",
+        "prepare": "husky",
+        "build": "turbo build",
+        "test": "turbo test",
+        "check": "biome check .",
+        "check:fix": "biome check --fix .",
+        "typecheck": "turbo typecheck"
+    },
+    "dependencies": {
+        "@squaredup/mcp-connectors": "workspace:*"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.2.6",
+        "@types/node": "^24.7.2",
+        "@typescript/native-preview": "^7.0.0-dev.20251016.1",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.2.4",
+        "msw": "^2.11.5",
+        "tsdown": "^0.15.7",
+        "turbo": "latest",
+        "typescript": "^5.9.3",
+        "unplugin-unused": "^0.5.4",
+        "vitest": "^3.2.4",
+        "vitest-mock-extended": "^3.1.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/squaredup/mcp.git"
+    },
+    "author": "SquaredUp",
+    "license": "Apache-2.0",
+    "lint-staged": {
+        "*": [
+            "biome check --fix --no-errors-on-unmatched"
+        ]
+    },
+    "packageManager": "bun@1.3.0"
+}

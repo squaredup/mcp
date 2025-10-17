@@ -1,0 +1,13 @@
+{
+    "debug.internalConsoleOptions": "neverOpen",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports.biome": "explicit",
+        "source.fixAll.biome": "explicit"
+    },
+    "files.eol": "\n",
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true
+    }
+}
