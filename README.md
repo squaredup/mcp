@@ -1,3 +1,7 @@
+# @squaredup/mcp
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 ## Features
 
 This monorepo contains packages and apps built with TypeScript and Zod:

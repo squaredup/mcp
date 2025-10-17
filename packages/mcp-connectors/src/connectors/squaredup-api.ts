@@ -93,7 +93,7 @@ export function createSquaredUpApiServer(credentials: SquaredUpCredentials): Mcp
         version: '1.0.0',
     });
 
-    server.tool('squaredup-api-list-dashboards', 'List all the dashboards in your organization', {}, async (_args) => {
+    server.tool('squaredup_api_list_dashboards', 'List all the dashboards in your organization', {}, async (_args) => {
         try {
             const client = new SquaredUpClient(credentials.apiKey, credentials.region);
             const dashboards = await client.listDashboards();
@@ -118,7 +118,7 @@ export function createSquaredUpApiServer(credentials: SquaredUpCredentials): Mcp
     });
 
     server.tool(
-        'squaredup-api-get-dashboard-image',
+        'squaredup_api_get_dashboard_image',
         'Get an image of a dashboard',
         {
             workspaceId: z.string().describe('The ID of the workspace containing the dashboard'),

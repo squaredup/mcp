@@ -1,4 +1,6 @@
-# SquaredUp MCP Server
+# @squaredup/mcp-server
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A dedicated server application for running SquaredUp MCP Server locally with development tooling support.
 

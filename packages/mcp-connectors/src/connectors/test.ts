@@ -12,7 +12,7 @@ export function createTestServer(credentials: TestCredentials): McpServer {
         version: '1.0.0',
     });
 
-    server.tool('test-tool', 'Test tool', {}, async (_args) => {
+    server.tool('test_tool', 'Test tool', {}, async (_args) => {
         console.log('CREDENTIALS', credentials);
         return {
             content: [
@@ -25,7 +25,7 @@ export function createTestServer(credentials: TestCredentials): McpServer {
     });
 
     server.tool(
-        'test-tool-with-args',
+        'test_tool_with_args',
         'Test tool with args',
         {
             param1: z.string().describe('Param 1'),

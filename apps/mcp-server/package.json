@@ -1,6 +1,6 @@
 {
     "name": "@squaredup/mcp-server",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "An app for running a SquaredUp MCP Server locally",
     "type": "module",
     "scripts": {

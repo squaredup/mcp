@@ -1,6 +1,6 @@
 {
     "name": "squaredup-mcp",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "private": true,
     "description": "SquaredUp MCP Server and some dev/test utils",
     "workspaces": {

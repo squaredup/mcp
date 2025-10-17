@@ -198,11 +198,8 @@ After reloading your MCP client, the connector's tools become available with the
 
 For example, with the test connector:
 
--   `mcp__localhost__test-tool` - Basic test tool
--   `mcp__localhost__test-tool-with-args` - Test tool with parameters
--   `mcp__localhost__persist_value` - Store key-value pairs
--   `mcp__localhost__get_value` - Retrieve stored values
--   `mcp__localhost__increment_counter` - Increment a persistent counter
+-   `mcp__localhost__test_tool` - Basic test tool
+-   `mcp__localhost__test_tool_with_args` - Test tool with parameters
 
 The tools can now be called directly by the agent and it can see the results.
 

@@ -23,7 +23,7 @@
     },
     "apps/mcp-server": {
       "name": "@squaredup/mcp-server",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "catalog:",
         "@squaredup/mcp-connectors": "workspace:*",
@@ -37,7 +37,7 @@
     },
     "packages/mcp-connectors": {
       "name": "@squaredup/mcp-connectors",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "catalog:",
         "@orama/orama": "^3.1.16",
