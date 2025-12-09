@@ -4,24 +4,16 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import {
+    buildServerFromConnector,
+    type ConnectorContext,
+    type MCPConnectorConfig,
+} from '@squaredup/mcp-config-types';
 
-// Import all connector factories
-import * as Connectors from '@squaredup/mcp-connectors';
+// Import all connectors
+import { Connectors } from '@squaredup/mcp-connectors';
 import express, { type Request, type Response } from 'express';
 import winston from 'winston';
-
-// Connector registry mapping connector keys to their factory functions
-const CONNECTOR_REGISTRY: Record<
-    string,
-    {
-        name: string;
-        factory: string;
-        description?: string;
-    }
-> = {
-    'squaredup-api': { name: 'SquaredUp API', factory: 'createSquaredUpApiServer' },
-    test: { name: 'Test', factory: 'createTestServer' },
-};
 
 // Ensure logs directory exists
 const logsDir = path.join(process.cwd(), 'logs');
@@ -70,8 +62,9 @@ const customLogger = (
     fileLogger.log(level, message, { ...meta, timestamp });
 };
 
-const getConnectorByKey = (connectorKey: string) => {
-    return CONNECTOR_REGISTRY[connectorKey] || null;
+// Find connector by key from the Connectors array
+const getConnectorByKey = (connectorKey: string): MCPConnectorConfig | null => {
+    return Connectors.find((c) => c.key === connectorKey) ?? null;
 };
 
 const printUsage = () => {
@@ -82,16 +75,66 @@ const printUsage = () => {
     console.log('Options:');
     console.log('  --connector    Connector key (required)');
     console.log('  --credentials  JSON string with connector credentials');
+    console.log('  --setup        JSON string with connector setup configuration');
     console.log('  --port         Port to run server on (default: 3000)');
     console.log('  --help         Show this help message');
     console.log('');
-    const connectorKeys = Object.keys(CONNECTOR_REGISTRY).sort();
+    const connectorKeys = Connectors.map((c) => c.key).sort();
     console.log(`Available connectors (${connectorKeys.length}):`);
-    console.log(connectorKeys.join(', '));
+    for (const connector of Connectors) {
+        console.log(`  ${connector.key} - ${connector.name}`);
+        if (connector.description) {
+            console.log(`    ${connector.description}`);
+        }
+    }
     console.log('');
     console.log('Examples:');
     console.log('  npm start -- --connector test');
-    console.log('  npm start -- --connector squaredup-api --credentials \'{"apiKey":"abcDEf", "region":"us"}\'');
+    console.log(
+        '  npm start -- --connector squaredup-api --credentials \'{"apiKey":"abcDEf", "region":"us"}\'',
+    );
+};
+
+/**
+ * Creates a ConnectorContext for the given credentials and setup.
+ * This is a simple in-memory implementation.
+ */
+const createContext = <C, S>(credentials: C, setup: S): ConnectorContext<C, S> => {
+    const dataStore = new Map<string, unknown>();
+    const cacheStore = new Map<string, string>();
+
+    return {
+        getCredentials: async () => credentials,
+        getSetup: async () => setup,
+        getData: async <T = unknown>(key?: string): Promise<T | null> => {
+            if (key === undefined) {
+                const obj: Record<string, unknown> = {};
+                for (const [k, v] of dataStore.entries()) {
+                    obj[k] = v;
+                }
+                return obj as T;
+            }
+            return (dataStore.get(key) as T) ?? null;
+        },
+        setData: async (
+            keyOrData: string | Record<string, unknown>,
+            value?: unknown,
+        ): Promise<void> => {
+            if (typeof keyOrData === 'string') {
+                dataStore.set(keyOrData, value);
+            } else {
+                for (const [k, v] of Object.entries(keyOrData)) {
+                    dataStore.set(k, v);
+                }
+            }
+        },
+        readCache: async (key: string): Promise<string | null> => {
+            return cacheStore.get(key) ?? null;
+        },
+        writeCache: async (key: string, value: string): Promise<void> => {
+            cacheStore.set(key, value);
+        },
+    };
 };
 
 export const startServer = async (): Promise<{
@@ -107,6 +150,9 @@ export const startServer = async (): Promise<{
                 short: 'c',
             },
             credentials: {
+                type: 'string',
+            },
+            setup: {
                 type: 'string',
             },
             port: {
@@ -141,7 +187,7 @@ export const startServer = async (): Promise<{
     if (!connectorConfig) {
         console.error(`❌ Connector "${connectorKey}" not found`);
         console.log('');
-        const connectorKeys = Object.keys(CONNECTOR_REGISTRY).sort();
+        const connectorKeys = Connectors.map((c) => c.key).sort();
         console.log(`Available connectors (${connectorKeys.length}):`);
         console.log(connectorKeys.join(', '));
         process.exit(1);
@@ -149,28 +195,38 @@ export const startServer = async (): Promise<{
 
     // Parse credentials
     let credentials: Record<string, unknown> = {};
-
     if (values.credentials) {
         try {
             credentials = JSON.parse(values.credentials);
         } catch (error) {
-            console.error('❌ Invalid credentials JSON:', error instanceof Error ? error.message : String(error));
+            console.error(
+                '❌ Invalid credentials JSON:',
+                error instanceof Error ? error.message : String(error),
+            );
             process.exit(1);
         }
     }
 
-    // Function to create a new MCP server instance using the connector factory
-    const getServer = (): McpServer => {
-        const factoryName = connectorConfig.factory;
-        const factory = (Connectors as Record<string, unknown>)[factoryName];
-
-        if (typeof factory !== 'function') {
-            throw new Error(`Factory function "${factoryName}" not found in @stackone/mcp-connectors`);
+    // Parse setup configuration
+    let setup: Record<string, unknown> = {};
+    if (values.setup) {
+        try {
+            setup = JSON.parse(values.setup);
+        } catch (error) {
+            console.error(
+                '❌ Invalid setup JSON:',
+                error instanceof Error ? error.message : String(error),
+            );
+            process.exit(1);
         }
+    }
 
-        // Call the factory function with credentials to get the server instance
-        const server = factory(credentials) as McpServer;
-        return server;
+    // Create context with parsed credentials and setup
+    const context = createContext(credentials, setup);
+
+    // Function to create a new MCP server instance using the connector config
+    const getServer = async (): Promise<McpServer> => {
+        return buildServerFromConnector(connectorConfig, context);
     };
 
     // Create Express app
@@ -200,7 +256,7 @@ export const startServer = async (): Promise<{
         // to ensure complete isolation. A single instance would cause request ID collisions
         // when multiple clients connect concurrently.
         try {
-            const server = getServer();
+            const server = await getServer();
             const transport = new StreamableHTTPServerTransport({
                 sessionIdGenerator: undefined, // Stateless mode - no sessions
             });
@@ -272,7 +328,6 @@ export const startServer = async (): Promise<{
 
     customLogger('Starting SquaredUp MCP Server (Stateless Mode)...', 'info');
     customLogger(`Connector: ${connectorConfig.name} (${connectorKey})`, 'info');
-    customLogger(`Factory: ${connectorConfig.factory}`, 'info');
     customLogger(`Port: ${port}`, 'info');
     customLogger(`Log file: ${path.join(logsDir, 'server.log')}`, 'info');
 

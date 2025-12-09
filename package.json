@@ -25,6 +25,7 @@
         "typecheck": "turbo typecheck"
     },
     "dependencies": {
+        "@squaredup/mcp-config-types": "workspace:*",
         "@squaredup/mcp-connectors": "workspace:*"
     },
     "devDependencies": {

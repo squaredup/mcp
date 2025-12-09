@@ -4,6 +4,7 @@
     "": {
       "name": "squaredup-mcp",
       "dependencies": {
+        "@squaredup/mcp-config-types": "workspace:*",
         "@squaredup/mcp-connectors": "workspace:*",
       },
       "devDependencies": {
@@ -26,6 +27,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "catalog:",
+        "@squaredup/mcp-config-types": "workspace:*",
         "@squaredup/mcp-connectors": "workspace:*",
         "express": "^5.1.0",
         "winston": "^3.17.0",
@@ -35,12 +37,25 @@
         "@types/node": "^24.8.0",
       },
     },
+    "packages/mcp-config-types": {
+      "name": "@squaredup/mcp-config-types",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@modelcontextprotocol/sdk": "catalog:",
+        "zod": "catalog:",
+      },
+      "peerDependencies": {
+        "@modelcontextprotocol/sdk": "^1.18.0",
+        "zod": "^4.0.0",
+      },
+    },
     "packages/mcp-connectors": {
       "name": "@squaredup/mcp-connectors",
       "version": "0.1.0",
       "dependencies": {
         "@modelcontextprotocol/sdk": "catalog:",
         "@orama/orama": "^3.1.16",
+        "@squaredup/mcp-config-types": "workspace:*",
         "modal": "^0.3.25",
         "zod": "catalog:",
       },
@@ -280,6 +295,8 @@
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.52.4", "", { "os": "win32", "cpu": "x64" }, "sha512-bf9PtUa0u8IXDVxzRToFQKsNCRz9qLYfR/MpECxl4mRoWYjAeFjgxj1XdZr2M/GNVpT05p+LgQOHopYDlUu6/w=="],
 
     "@so-ric/colorspace": ["@so-ric/colorspace@1.1.6", "", { "dependencies": { "color": "^5.0.2", "text-hex": "1.0.x" } }, "sha512-/KiKkpHNOBgkFJwu9sh48LkHSMYGyuTcSFK/qMBdnOAlrRJzRSXAOFB5qwzaVQuDl8wAvHVMkaASQDReTahxuw=="],
+
+    "@squaredup/mcp-config-types": ["@squaredup/mcp-config-types@workspace:packages/mcp-config-types"],
 
     "@squaredup/mcp-connectors": ["@squaredup/mcp-connectors@workspace:packages/mcp-connectors"],
 

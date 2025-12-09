@@ -6,9 +6,9 @@
 
 This monorepo contains packages and apps built with TypeScript and Zod:
 
-**@squaredup/mcp-connectors** - Connectors for SquaredUp products and features
-
-**@squaredup/mcp-server** - An app for running an MCP Server locally
+-   **@squaredup/mcp-connectors** - Connectors for SquaredUp products and features
+-   **@squaredup/mcp-server** - An app for running an MCP server locally
+-   **@squaredup/mcp-config-types** - Shared type definitions and configuration framework for building connectors
 
 ## Getting Started
 
@@ -67,7 +67,12 @@ Server runs at `http://localhost:3000/mcp`
 
 ## Available Connectors
 
-**squaredup-api** - tools to work with dashboards and data
+| Connector       | Description                                       | Credentials                |
+| --------------- | ------------------------------------------------- | -------------------------- |
+| `test`          | Simple test connector for development and testing | `apiKey`, `someSetting`    |
+| `squaredup-api` | Tools to work with SquaredUp dashboards and data  | `apiKey`, `region` (us/eu) |
+
+See [SquaredUp API Methods](./docs/squaredup-api-methods.md) for details on available and planned API tools.
 
 ## License
 

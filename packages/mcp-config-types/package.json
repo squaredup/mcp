@@ -1,7 +1,7 @@
 {
-    "name": "@squaredup/mcp-connectors",
-    "version": "0.1.0",
-    "description": "Connectors for SquaredUp MCP Server",
+    "name": "@squaredup/mcp-config-types",
+    "version": "0.0.1",
+    "description": "MCP config types for SquaredUp connectors",
     "module": "./dist/index.js",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -10,31 +10,25 @@
         "./package.json": "./package.json"
     },
     "type": "module",
-    "files": [
-        "dist"
-    ],
+    "files": ["dist", "LICENSE"],
     "scripts": {
         "build": "bun -b tsdown",
         "prepublishOnly": "bun run build",
-        "test": "vitest --run",
+        "test": "vitest --run --passWithNoTests",
         "typecheck": "tsgo --noEmit"
     },
-    "dependencies": {
-        "@modelcontextprotocol/sdk": "catalog:",
-        "@orama/orama": "^3.1.16",
-        "@squaredup/mcp-config-types": "workspace:*",
-        "modal": "^0.3.25",
-        "zod": "catalog:"
+    "peerDependencies": {
+        "zod": "^4.0.0",
+        "@modelcontextprotocol/sdk": "^1.18.0"
+    },
+    "devDependencies": {
+        "zod": "catalog:",
+        "@modelcontextprotocol/sdk": "catalog:"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/squaredup/mcp.git"
     },
-    "keywords": [
-        "mcp",
-        "model-context-protocol",
-        "squaredup"
-    ],
     "author": "SquaredUp",
     "license": "Apache-2.0",
     "bugs": "https://github.com/squaredup/mcp/issues",

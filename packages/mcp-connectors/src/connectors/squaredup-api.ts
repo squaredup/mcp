@@ -1,4 +1,4 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { mcpConnectorConfig } from '@squaredup/mcp-config-types';
 import { z } from 'zod';
 
 interface SquaredUpTile {
@@ -29,11 +29,6 @@ interface SquaredUpDashboard {
 
 interface SquaredUpImageUrl {
     url: string;
-}
-
-export interface SquaredUpCredentials {
-    apiKey: string;
-    region: 'us' | 'eu';
 }
 
 class SquaredUpClient {
@@ -87,75 +82,58 @@ class SquaredUpClient {
     }
 }
 
-export function createSquaredUpApiServer(credentials: SquaredUpCredentials): McpServer {
-    const server = new McpServer({
-        name: 'SquaredUp API',
-        version: '1.0.0',
-    });
-
-    server.tool('squaredup_api_list_dashboards', 'List all the dashboards in your organization', {}, async (_args) => {
-        try {
-            const client = new SquaredUpClient(credentials.apiKey, credentials.region);
-            const dashboards = await client.listDashboards();
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: JSON.stringify(dashboards, null, 2),
-                    },
-                ],
-            };
-        } catch (error) {
-            return {
-                content: [
-                    {
-                        type: 'text',
-                        text: `Failed to get dashboards: ${error instanceof Error ? error.message : String(error)}`,
-                    },
-                ],
-            };
-        }
-    });
-
-    server.tool(
-        'squaredup_api_get_dashboard_image',
-        'Get an image of a dashboard',
-        {
-            workspaceId: z.string().describe('The ID of the workspace containing the dashboard'),
-            dashboardId: z.string().describe('The ID of the dashboard to get the image of'),
-        },
-        async (args) => {
-            try {
-                const client = new SquaredUpClient(credentials.apiKey, credentials.region);
-                const imageUrl = await client.getDashboardImage(args.workspaceId, args.dashboardId);
-                const response = await fetch(imageUrl.url);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
+    name: 'SquaredUp API',
+    key: 'squaredup-api',
+    version: '1.0.0',
+    description: 'Connect to SquaredUp to list dashboards and generate dashboard images',
+    credentials: z.object({
+        apiKey: z.string().describe('Your SquaredUp API key'),
+        region: z
+            .enum(['us', 'eu'])
+            .describe('The region your SquaredUp instance is hosted in (us or eu)'),
+    }),
+    setup: z.object({}),
+    examplePrompt:
+        'List all my SquaredUp dashboards, then generate an image of the first dashboard.',
+    tools: (tool) => ({
+        LIST_DASHBOARDS: tool({
+            name: 'squaredup_api_list_dashboards',
+            description: 'List all the dashboards in your organization',
+            schema: z.object({}),
+            handler: async (_args, context) => {
+                try {
+                    const { apiKey, region } = await context.getCredentials();
+                    const client = new SquaredUpClient(apiKey, region);
+                    const dashboards = await client.listDashboards();
+                    return JSON.stringify(dashboards, null, 2);
+                } catch (error) {
+                    return `Failed to get dashboards: ${error instanceof Error ? error.message : String(error)}`;
                 }
-                const mimeType = response.headers.get('content-type') ?? 'image/png';
-                const arrayBuffer = await response.arrayBuffer();
-                const base64Data = Buffer.from(arrayBuffer).toString('base64');
-                return {
-                    content: [
-                        {
-                            type: 'image',
-                            mimeType,
-                            data: base64Data,
-                        },
-                    ],
-                };
-            } catch (error) {
-                return {
-                    content: [
-                        {
-                            type: 'text',
-                            text: `Failed to get image URL: ${error instanceof Error ? error.message : String(error)}`,
-                        },
-                    ],
-                };
-            }
-        },
-    );
+            },
+        }),
+        GET_DASHBOARD_IMAGE: tool({
+            name: 'squaredup_api_get_dashboard_image',
+            description: 'Get an image of a dashboard',
+            schema: z.object({
+                workspaceId: z.string().describe('The ID of the workspace containing the dashboard'),
+                dashboardId: z.string().describe('The ID of the dashboard to get the image of'),
+            }),
+            handler: async (args, context) => {
+                try {
+                    const { apiKey, region } = await context.getCredentials();
+                    const client = new SquaredUpClient(apiKey, region);
+                    const imageUrl = await client.getDashboardImage(args.workspaceId, args.dashboardId);
+                    // Note: Image fetching and base64 encoding should be handled by the server
+                    // This returns the URL for now; the server can fetch and encode if needed
+                    return JSON.stringify(imageUrl);
+                } catch (error) {
+                    return `Failed to get image URL: ${error instanceof Error ? error.message : String(error)}`;
+                }
+            },
+        }),
+    }),
+});
 
-    return server;
-}
+// Re-export types for backwards compatibility
+export type SquaredUpCredentials = z.infer<typeof SquaredUpApiConnectorConfig.credentials>;
