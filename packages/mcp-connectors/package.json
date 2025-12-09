@@ -26,6 +26,9 @@
         "modal": "^0.3.25",
         "zod": "catalog:"
     },
+    "devDependencies": {
+        "@types/node": "^24.8.0"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/squaredup/mcp.git"

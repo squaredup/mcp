@@ -42,6 +42,7 @@
       "version": "0.0.1",
       "devDependencies": {
         "@modelcontextprotocol/sdk": "catalog:",
+        "@types/node": "^24.8.0",
         "zod": "catalog:",
       },
       "peerDependencies": {
@@ -58,6 +59,9 @@
         "@squaredup/mcp-config-types": "workspace:*",
         "modal": "^0.3.25",
         "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@types/node": "^24.8.0",
       },
     },
   },
