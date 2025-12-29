@@ -23,8 +23,14 @@ If you want to run the connectors locally:
 
 2. **Install Bun** (if you don't have it already):
 
+    **Mac/Linux:**
     ```bash
     curl -fsSL https://bun.sh/install | bash
+    ```
+
+    **Windows (PowerShell):**
+    ```powershell
+    powershell -c "irm bun.sh/install.ps1|iex"
     ```
 
 3. **Install dependencies:**
@@ -55,6 +61,7 @@ This is a monorepo managed with Bun and Turbo.
 
 ### Start a server from a connector
 
+**Mac/Linux/Git Bash:**
 ```bash
 # Start a test server in the background
 bun run server -- -- --connector test
@@ -63,7 +70,21 @@ bun run server -- -- --connector test
 bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"abcDEf", "region":"us"}'
 ```
 
+**Windows (PowerShell):**
+```powershell
+# Start a test server in the background
+bun run server -- -- --connector test
+
+# Start with credentials - use backticks to escape quotes in PowerShell
+bun run dev -- -- --connector squaredup-api --credentials '{`"apiKey`":`"abcDEf`",`"region`":`"us`"}'
+
+# Alternative: Use escaped double quotes
+bun run dev -- -- --connector squaredup-api --credentials '{\"apiKey\":\"abcDEf\",\"region\":\"us\"}'
+```
+
 Server runs at `http://localhost:3000/mcp`
+
+> **Note for Windows users:** PowerShell handles quotes differently than bash. Use either backtick escaping (`` `" ``) or backslash escaping (`\"`) for JSON credentials. Alternatively, use Git Bash for the same syntax as Mac/Linux.
 
 ## Available Connectors
 
