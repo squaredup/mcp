@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -344,7 +345,9 @@ export const startServer = async (): Promise<{
 };
 
 // Only start the server if this is the main module
-if (import.meta.url === `file://${process.argv[1]}`) {
+const currentFile = fileURLToPath(import.meta.url);
+const mainFile = path.resolve(process.argv[1]);
+if (currentFile === mainFile) {
     const { app, port } = await startServer();
     app.listen(port, () => {
         customLogger('Server ready and listening for requests!', 'info');
