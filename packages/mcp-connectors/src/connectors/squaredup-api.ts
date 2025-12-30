@@ -36,14 +36,20 @@ class SquaredUpClient {
     private baseUrl: string;
     private prefix: string = '';
 
-    constructor(apiKey: string, region: string) {
+    constructor(apiKey: string, region: string, customBaseUrl?: string) {
         this.headers = {
             apiKey: apiKey,
             Accept: 'application/json',
             'Content-Type': 'application/json',
         };
-        this.prefix = region !== 'us' ? `${region}.` : '';
-        this.baseUrl = `https://${this.prefix}api.squaredup.com/api`;
+
+        // Use custom base URL if provided, otherwise use default with region
+        if (customBaseUrl) {
+            this.baseUrl = customBaseUrl;
+        } else {
+            this.prefix = region !== 'us' ? `${region}.` : '';
+            this.baseUrl = `https://${this.prefix}api.squaredup.com/api`;
+        }
     }
 
     async listDashboards(): Promise<SquaredUpDashboard[]> {
@@ -92,6 +98,12 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
         region: z
             .enum(['us', 'eu'])
             .describe('The region your SquaredUp instance is hosted in (us or eu)'),
+        baseUrl: z
+            .string()
+            .optional()
+            .describe(
+                'Custom API base URL (e.g., https://dev.api.squaredup.com/api for dev environment). If not provided, uses production URL based on region.',
+            ),
     }),
     setup: z.object({}),
     examplePrompt:
@@ -103,8 +115,8 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
             schema: z.object({}),
             handler: async (_args, context) => {
                 try {
-                    const { apiKey, region } = await context.getCredentials();
-                    const client = new SquaredUpClient(apiKey, region);
+                    const { apiKey, region, baseUrl } = await context.getCredentials();
+                    const client = new SquaredUpClient(apiKey, region, baseUrl);
                     const dashboards = await client.listDashboards();
                     return JSON.stringify(dashboards, null, 2);
                 } catch (error) {
@@ -121,8 +133,8 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
             }),
             handler: async (args, context) => {
                 try {
-                    const { apiKey, region } = await context.getCredentials();
-                    const client = new SquaredUpClient(apiKey, region);
+                    const { apiKey, region, baseUrl } = await context.getCredentials();
+                    const client = new SquaredUpClient(apiKey, region, baseUrl);
                     const imageUrl = await client.getDashboardImage(args.workspaceId, args.dashboardId);
                     // Note: Image fetching and base64 encoding should be handled by the server
                     // This returns the URL for now; the server can fetch and encode if needed

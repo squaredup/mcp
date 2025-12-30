@@ -66,8 +66,11 @@ This is a monorepo managed with Bun and Turbo.
 # Start a test server in the background
 bun run server -- -- --connector test
 
-# Start with credentials (credentials object schema may be different for each connector)
+# Start with credentials - production environment (credentials object schema may be different for each connector)
 bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"abcDEf", "region":"us"}'
+
+# Start with custom base URL - for dev/staging environments
+bun run dev -- -- --connector squaredup-api --credentials '{"apiKey":"abcDEf", "region":"us", "baseUrl":"https://dev.api.squaredup.com/api"}'
 ```
 
 **Windows (PowerShell):**
@@ -75,11 +78,14 @@ bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"abcDEf"
 # Start a test server in the background
 bun run server -- -- --connector test
 
-# Start with credentials - use backticks to escape quotes in PowerShell
+# Start with credentials - production environment (use backticks to escape quotes in PowerShell)
 bun run dev -- -- --connector squaredup-api --credentials '{`"apiKey`":`"abcDEf`",`"region`":`"us`"}'
 
-# Alternative: Use escaped double quotes
-bun run dev -- -- --connector squaredup-api --credentials '{\"apiKey\":\"abcDEf\",\"region\":\"us\"}'
+# Start with custom base URL - for dev/staging environments
+bun run dev -- -- --connector squaredup-api --credentials '{`"apiKey`":`"abcDEf`",`"region`":`"us`",`"baseUrl`":`"https://dev.api.squaredup.com/api`"}'
+
+# Alternative: Use escaped double quotes (remove baseUrl for production)
+bun run dev -- -- --connector squaredup-api --credentials '{\"apiKey\":\"abcDEf\",\"region\":\"us\",\"baseUrl\":\"https://dev.api.squaredup.com/api\"}'
 ```
 
 Server runs at `http://localhost:3000/mcp`
@@ -88,10 +94,10 @@ Server runs at `http://localhost:3000/mcp`
 
 ## Available Connectors
 
-| Connector       | Description                                       | Credentials                |
-| --------------- | ------------------------------------------------- | -------------------------- |
-| `test`          | Simple test connector for development and testing | `apiKey`, `someSetting`    |
-| `squaredup-api` | Tools to work with SquaredUp dashboards and data  | `apiKey`, `region` (us/eu) |
+| Connector       | Description                                       | Credentials                                                    |
+| --------------- | ------------------------------------------------- | -------------------------------------------------------------- |
+| `test`          | Simple test connector for development and testing | `apiKey`, `someSetting`                                        |
+| `squaredup-api` | Tools to work with SquaredUp dashboards and data  | `apiKey`, `region` (us/eu), `baseUrl` (optional, for dev/staging) |
 
 See [SquaredUp API Methods](./docs/squaredup-api-methods.md) for details on available and planned API tools.
 
