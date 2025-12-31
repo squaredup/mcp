@@ -41,3 +41,6 @@ logs/
 
 # Code tools
 .claude
+
+# Windows reserved device names
+NUL
