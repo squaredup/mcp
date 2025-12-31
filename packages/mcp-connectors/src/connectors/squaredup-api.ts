@@ -1,29 +1,87 @@
 import { mcpConnectorConfig } from "@squaredup/mcp-config-types";
 import { z } from "zod";
+import type {
+  DataSource,
+  DataStream,
+  SquaredUpDashboard,
+  TileConfig,
+  TimeframeEnumValue,
+} from "../types/squaredup/types";
 
+type VisualizationType =
+  | "data-stream-table"
+  | "data-stream-line-graph"
+  | "data-stream-bar-chart"
+  | "data-stream-gauge"
+  | "data-stream-scalar"
+  | "data-stream-blocks"
+  | "data-stream-donut-chart";
+
+// Tile configuration for data stream tiles
+interface DataStreamTileConfig {
+  title?: string;
+  description?: string;
+  visualization: VisualizationType;
+  pluginConfigId: string;
+  dataStreamId: string;
+  scope?: { workspaceScope: true } | Record<string, unknown>;
+  timeframe?: TimeframeEnumValue;
+  monitor?: unknown;
+  noBackground?: boolean;
+  noHeader?: boolean;
+}
+
+// Complete tile structure
 interface SquaredUpTile {
+  i: string; // Unique tile ID
+  x: number; // Grid x position
+  y: number; // Grid y position
+  w: number; // Width
+  h: number; // Height
+  _type: "tile/text" | "tile/data-stream";
+  config: DataStreamTileConfig;
   static?: boolean;
-  w: number;
   moved?: boolean;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-  config: unknown;
   z?: number;
 }
 
-interface SquaredUpDashboardContent {
-  _type: "layout/grid";
-  contents: SquaredUpTile[];
+// Creating a data stream tile options
+interface DataStreamTileOptions {
+  tileId: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  visualization: VisualizationType;
+  pluginConfigId: string;
+  dataStreamId: string;
+  workspaceScope?: boolean;
+  scope?: Record<string, unknown>;
+  title?: string;
+  description?: string;
+  timeframe?: TimeframeEnumValue;
+  monitor?: unknown;
+  noBackground?: boolean;
+  noHeader?: boolean;
 }
 
-interface SquaredUpDashboard {
-  content?: SquaredUpDashboardContent;
-  dashboardId?: string;
-  description: string;
+// Creating a tile on a dashboard options
+interface CreateDashboardTileOptions extends DataStreamTileOptions {
+  dashboardId: string;
+}
+
+// Simplified data stream info returned to LLM
+interface DataStreamInfo {
   displayName: string;
-  id?: string;
+  dataSourceName: string;
+  timeframes: boolean | TimeframeEnumValue[] | undefined;
+}
+
+// Simplified dashboard info for listing
+interface DashboardListItem {
+  dashboardId: string;
+  displayName: string;
+  description: string;
   workspaceId: string;
 }
 
@@ -48,7 +106,7 @@ class SquaredUpClient {
     }
   }
 
-  async listDashboards(): Promise<SquaredUpDashboard[]> {
+  async listDashboards(): Promise<DashboardListItem[]> {
     const response = await fetch(`${this.baseUrl}/dashboards`, {
       method: "GET",
       headers: {
@@ -58,7 +116,9 @@ class SquaredUpClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[SquaredUpClient] listDashboards failed: ${response.status} - ${errorText}`);
+      console.error(
+        `[SquaredUpClient] listDashboards failed: ${response.status} - ${errorText}`
+      );
       throw new Error(
         `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
       );
@@ -84,7 +144,9 @@ class SquaredUpClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[SquaredUpClient] getDashboard failed: ${response.status} - ${errorText}`);
+      console.error(
+        `[SquaredUpClient] getDashboard failed: ${response.status} - ${errorText}`
+      );
       throw new Error(
         `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
       );
@@ -119,10 +181,10 @@ class SquaredUpClient {
 
   async getTileData(
     tileConfig: unknown,
-    timeframe: string | object = "last24hours",
+    timeframe: TimeframeEnumValue,
     workspaceId?: string,
     dashboardId?: string
-  ): Promise<unknown> {
+  ): Promise<TileConfig> {
     const requestBody: {
       tileConfig: unknown;
       timeframe: string | object;
@@ -153,13 +215,161 @@ class SquaredUpClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[SquaredUpClient] getTileData failed: ${response.status} - ${errorText}`);
+      console.error(
+        `[SquaredUpClient] getTileData failed: ${response.status} - ${errorText}`
+      );
       throw new Error(
         `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
       );
     }
 
-    return await response.json();
+    return (await response.json()) as TileConfig;
+  }
+
+  async getDataSources(options?: {
+    workspaceId?: string;
+    allWorkspaces?: boolean;
+    forAdministration?: boolean;
+  }): Promise<DataSource[]> {
+    const params = new URLSearchParams();
+
+    if (options?.workspaceId) {
+      params.append("workspaceId", options.workspaceId);
+    }
+
+    if (options?.allWorkspaces) {
+      params.append("allWorkspaces", "true");
+    }
+
+    if (options?.forAdministration) {
+      params.append("forAdministration", "true");
+    }
+
+    const url = `${this.baseUrl}/datasources${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        apiKey: this.apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[SquaredUpClient] getDataSources failed: ${response.status} - ${errorText}`
+      );
+      throw new Error(
+        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    return response.json() as Promise<DataSource[]>;
+  }
+
+  async getPluginDataStreams(options: {
+    pluginId: string;
+  }): Promise<DataStreamInfo[]> {
+    const url = `${this.baseUrl}/datastreams/plugin/${options.pluginId}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        apiKey: this.apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[SquaredUpClient] getPluginDataStreams failed: ${response.status} - ${errorText}`
+      );
+      throw new Error(
+        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    // Ensure we only give relevant data to the LLM to avoid large context
+    const dataStreams = (await response.json()) as DataStream[];
+    return dataStreams.map((dataStream) => ({
+      displayName: dataStream.displayName,
+      dataSourceName: dataStream.definition.name,
+      timeframes: dataStream.definition.timeframes,
+    }));
+  }
+
+  createDataStreamTile(options: DataStreamTileOptions): SquaredUpTile {
+    return {
+      i: options.tileId,
+      x: options.x,
+      y: options.y,
+      w: options.w,
+      h: options.h,
+      _type: "tile/data-stream",
+      config: {
+        title: options.title,
+        description: options.description,
+        visualization: options.visualization,
+        pluginConfigId: options.pluginConfigId,
+        dataStreamId: options.dataStreamId,
+        scope: options.workspaceScope
+          ? { workspaceScope: true }
+          : options.scope,
+        timeframe: options.timeframe,
+        monitor: options.monitor,
+        noBackground: options.noBackground,
+        noHeader: options.noHeader,
+      },
+    };
+  }
+
+  async createDashboardTile(
+    options: CreateDashboardTileOptions
+  ): Promise<void> {
+    // 1. Get existing dashboard
+    const dashboard = await this.getDashboard(options.dashboardId);
+
+    if (dashboard.content._type !== "layout/grid") {
+      throw new Error("Unsupported dashboard layout");
+    }
+
+    // 2. Create tile
+    const tile = this.createDataStreamTile(options);
+
+    // 3. Append tile
+    const updatedDashboard: SquaredUpDashboard = {
+      id: dashboard.id,
+      displayName: dashboard.displayName,
+      workspaceId: dashboard.workspaceId,
+      content: {
+        ...dashboard.content,
+        contents: [...dashboard.content.contents, tile],
+      },
+    };
+
+    // 4. PUT updated dashboard
+    const url = `${this.baseUrl}/dashboards/${options.dashboardId}`;
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        apiKey: this.apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedDashboard),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[SquaredUpClient] createDashboardTile failed: ${response.status} - ${errorText}`
+      );
+      throw new Error(
+        `Failed to update dashboard: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
   }
 }
 
@@ -336,7 +546,7 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
             try {
               const tileData = await client.getTileData(
                 tile.config,
-                args.timeframe || "last24hours",
+                (args.timeframe || "last24hours") as TimeframeEnumValue,
                 args.workspaceId,
                 args.dashboardId
               );
