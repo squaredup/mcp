@@ -170,6 +170,48 @@ export interface DataStreamDefinition {
     DataStreamSortingConfig;
 }
 
+export interface PluginConfig {
+  id: string;
+  displayName: string;
+  lastUpdated: string; // ISO timestamp
+  type: "config";
+  subType: "source.plugin";
+  tenant: string;
+  lastImportVersion: number;
+
+  plugin: PluginInfo;
+  importStatus: ImportStatus;
+}
+
+export interface PluginInfo {
+  pluginId: string;
+  name: string;
+  displayName: string;
+  lambdaName: string;
+  version: string;
+  onPrem: boolean;
+  importNotSupported: boolean;
+}
+
+export interface ImportStatus {
+  status: "succeeded" | "failed" | "running";
+  started: number; // epoch ms
+  ended?: number;
+  warnings: unknown[];
+  totalWarningCount: number;
+  invalidVertexCount?: number;
+  invalidEdgeCount?: number;
+  lastSuccessful?: LastSuccessfulImport;
+}
+
+export interface LastSuccessfulImport {
+  status: "succeeded";
+  started: number;
+  ended: number;
+  warnings: unknown[];
+  totalWarningCount: number;
+}
+
 // ============================================
 // STREAM DATA COLUMN DEFINITION (Metadata)
 // ============================================

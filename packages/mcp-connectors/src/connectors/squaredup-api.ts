@@ -3,6 +3,7 @@ import { z } from "zod";
 import type {
   DataSource,
   DataStream,
+  PluginConfig,
   SquaredUpDashboard,
   TileConfig,
   TimeframeEnumValue,
@@ -68,13 +69,6 @@ interface DataStreamTileOptions {
 // Creating a tile on a dashboard options
 interface CreateDashboardTileOptions extends DataStreamTileOptions {
   dashboardId: string;
-}
-
-// Simplified data stream info returned to LLM
-interface DataStreamInfo {
-  displayName: string;
-  dataSourceName: string;
-  timeframes: boolean | TimeframeEnumValue[] | undefined;
 }
 
 // Simplified dashboard info for listing
@@ -230,7 +224,7 @@ class SquaredUpClient {
     workspaceId?: string;
     allWorkspaces?: boolean;
     forAdministration?: boolean;
-  }): Promise<DataSource[]> {
+  }): Promise<PluginConfig[]> {
     const params = new URLSearchParams();
 
     if (options?.workspaceId) {
@@ -266,12 +260,12 @@ class SquaredUpClient {
       );
     }
 
-    return response.json() as Promise<DataSource[]>;
+    return response.json() as Promise<PluginConfig[]>;
   }
 
   async getPluginDataStreams(options: {
     pluginId: string;
-  }): Promise<DataStreamInfo[]> {
+  }): Promise<DataStream[]> {
     const url = `${this.baseUrl}/datastreams/plugin/${options.pluginId}`;
 
     const response = await fetch(url, {
@@ -293,11 +287,8 @@ class SquaredUpClient {
 
     // Ensure we only give relevant data to the LLM to avoid large context
     const dataStreams = (await response.json()) as DataStream[];
-    return dataStreams.map((dataStream) => ({
-      displayName: dataStream.displayName,
-      dataSourceName: dataStream.definition.name,
-      timeframes: dataStream.definition.timeframes,
-    }));
+
+    return dataStreams;
   }
 
   createDataStreamTile(options: DataStreamTileOptions): SquaredUpTile {
@@ -393,7 +384,7 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
   }),
   setup: z.object({}),
   examplePrompt:
-    "List all my dashboards, then show me the tiles in the BMW dashboard, and fetch data for the first tile.",
+    "Add a CPU usage tile to my Production dashboard using my Prometheus data source",
   tools: (tool) => ({
     LIST_DASHBOARDS: tool({
       name: "squaredup_api_list_dashboards",
@@ -587,6 +578,240 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           );
         } catch (error) {
           return `Failed to get tile data: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    GET_TILE_POSITIONS: tool({
+      name: "squaredup_api_get_tile_positions",
+      description:
+        "Get grid positions of all tiles on a dashboard. Use this when planning where to place a new tile - it returns only positioning info without heavy config data.",
+      schema: z.object({
+        dashboardId: z
+          .string()
+          .describe("The dashboard ID to get tile positions from"),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+          const dashboard = await client.getDashboard(args.dashboardId);
+
+          if (!dashboard.content?.contents) {
+            return JSON.stringify({
+              dashboard: {
+                name: dashboard.displayName,
+                id: args.dashboardId,
+              },
+              totalTiles: 0,
+              positions: [],
+            });
+          }
+
+          // Extract only positioning info - no heavy config data
+          const positions = dashboard.content.contents.map((tile) => {
+            const tileConfig = tile.config as { title?: string };
+            return {
+              tileId: tile.i,
+              title: tileConfig?.title || "Untitled",
+              x: tile.x,
+              y: tile.y,
+              width: tile.w,
+              height: tile.h,
+            };
+          });
+
+          return JSON.stringify(
+            {
+              dashboard: {
+                name: dashboard.displayName,
+                id: args.dashboardId,
+              },
+              totalTiles: positions.length,
+              positions,
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to get tile positions: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    LIST_DATA_SOURCES: tool({
+      name: "squaredup_api_list_data_sources",
+      description:
+        "List available data sources (plugins) that can be used to create tiles. Call this when the user wants to add a tile and needs to choose a data source or know about a certain data source (plugin) ",
+      schema: z.object({
+        workspaceId: z
+          .string()
+          .optional()
+          .describe("Filter by workspace ID (optional)"),
+        allWorkspaces: z
+          .boolean()
+          .optional()
+          .describe("Show data sources from all workspaces"),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+          const dataSources = await client.getDataSources({
+            workspaceId: args.workspaceId,
+            allWorkspaces: args.allWorkspaces,
+          });
+
+          console.log("returned data sources");
+
+          // Return simplified info to avoid overwhelming the LLM
+          const simplified = dataSources.map((ds) => ({
+            id: ds.id,
+            displayName: ds.displayName,
+            pluginId: ds.plugin.pluginId,
+          }));
+
+          return JSON.stringify(
+            {
+              totalDataSources: simplified.length,
+              dataSources: simplified,
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to list data sources: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    LIST_PLUGIN_DATA_STREAMS: tool({
+      name: "squaredup_api_list_plugin_data_streams",
+      description:
+        "Get available data streams for a specific plugin. Call this after the user selects a data source and you need a specific data stream form this data source / plugin",
+      schema: z.object({
+        pluginId: z
+          .string()
+          .describe(
+            "The plugin ID from the data source (e.g., 'prometheus', 'azure-monitor')"
+          ),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+          const dataStreams = await client.getPluginDataStreams({
+            pluginId: args.pluginId,
+          });
+          const simplifiedDataStreams = dataStreams.map((dataStream) => ({
+            displayName: dataStream.displayName,
+            dataSourceName: dataStream.definition.name,
+            timeframes: dataStream.definition.timeframes,
+          }));
+
+          return JSON.stringify(
+            {
+              pluginId: args.pluginId,
+              totalDataStreams: dataStreams.length,
+              dataStreams: simplifiedDataStreams,
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to list data streams: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    CREATE_TILE: tool({
+      name: "squaredup_api_create_tile",
+      description:
+        "Create a new tile on a dashboard. This is the final step after gathering all tile information from the user. Use this after: 1) Finding the dashboard, 2) Getting existing tiles to find free space, 3) Getting the data source plugin ID, 4) Getting the data stream ID, 5) Confirming visualization type and position with the user.",
+      schema: z.object({
+        dashboardId: z
+          .string()
+          .describe("The dashboard ID where the tile will be added"),
+        tileId: z
+          .string()
+          .describe(
+            "Unique tile ID - generate a random unique string (e.g., 'tile-' + random chars)"
+          ),
+        x: z.number().describe("Grid X position (0-based)"),
+        y: z.number().describe("Grid Y position (0-based)"),
+        w: z.number().describe("Tile width in grid units (typically 4-12)"),
+        h: z.number().describe("Tile height in grid units (typically 3-6)"),
+        visualization: z
+          .enum([
+            "data-stream-table",
+            "data-stream-line-graph",
+            "data-stream-bar-chart",
+            "data-stream-gauge",
+            "data-stream-scalar",
+            "data-stream-blocks",
+            "data-stream-donut-chart",
+          ])
+          .describe("Visualization type for the tile"),
+        pluginConfigId: z
+          .string()
+          .describe("The data source ID from LIST_DATA_SOURCES"),
+        dataStreamId: z
+          .string()
+          .describe("The data stream name from LIST_PLUGIN_DATA_STREAMS"),
+        title: z.string().optional().describe("Tile title"),
+        description: z.string().optional().describe("Tile description"),
+        timeframe: z
+          .string()
+          .optional()
+          .describe(
+            "Timeframe (e.g., 'last1hour', 'last24hours'). Defaults to 'last24hours'"
+          ),
+        workspaceScope: z
+          .boolean()
+          .optional()
+          .describe(
+            "Use workspace scope (shows data for all resources in workspace)"
+          ),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+
+          await client.createDashboardTile({
+            dashboardId: args.dashboardId,
+            tileId: args.tileId,
+            x: args.x,
+            y: args.y,
+            w: args.w,
+            h: args.h,
+            visualization: args.visualization,
+            pluginConfigId: args.pluginConfigId,
+            dataStreamId: args.dataStreamId,
+            title: args.title,
+            description: args.description,
+            timeframe: args.timeframe as TimeframeEnumValue | undefined,
+            workspaceScope: args.workspaceScope,
+          });
+
+          return JSON.stringify(
+            {
+              success: true,
+              message: `Tile "${
+                args.title || "Untitled"
+              }" created successfully on dashboard`,
+              tileId: args.tileId,
+              dashboardId: args.dashboardId,
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to create tile: ${
             error instanceof Error ? error.message : String(error)
           }`;
         }
