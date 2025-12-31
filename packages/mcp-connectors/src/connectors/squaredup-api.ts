@@ -18,15 +18,23 @@ type VisualizationType =
   | "data-stream-blocks"
   | "data-stream-donut-chart";
 
-// Tile configuration for data stream tiles
+// Tile configuration for data stream tiles (CORRECT SQUAREDUP FORMAT)
 interface DataStreamTileConfig {
+  _type: "tile/data-stream"; // Inside config, not at tile level!
   title?: string;
   description?: string;
-  visualization: VisualizationType;
-  pluginConfigId: string;
-  dataStreamId: string;
-  scope?: { workspaceScope: true } | Record<string, unknown>;
   timeframe?: TimeframeEnumValue;
+  dataStream: {
+    // Nested object
+    pluginConfigId: string;
+    name: string; // Use NAME not ID! Server resolves name to ID automatically
+  };
+  scope: { query: string } | { workspace: string; scope: string } | string[]; // REQUIRED!
+  visualisation: {
+    // UK spelling, object not string!
+    type: VisualizationType;
+    config?: Record<string, unknown>;
+  };
   monitor?: unknown;
   noBackground?: boolean;
   noHeader?: boolean;
@@ -39,7 +47,6 @@ interface SquaredUpTile {
   y: number; // Grid y position
   w: number; // Width
   h: number; // Height
-  _type: "tile/text" | "tile/data-stream";
   config: DataStreamTileConfig;
   static?: boolean;
   moved?: boolean;
@@ -81,6 +88,23 @@ interface DashboardListItem {
 
 interface SquaredUpImageUrl {
   url: string;
+}
+
+// Workspace scope interfaces
+interface WorkspaceScope {
+  id: string;
+  displayName: string;
+  content: {
+    query?: string;
+    [key: string]: unknown;
+  };
+}
+
+interface CreateWorkspaceScopeOptions {
+  workspaceId: string;
+  displayName: string;
+  query?: string;
+  content?: Record<string, unknown>;
 }
 
 class SquaredUpClient {
@@ -291,24 +315,89 @@ class SquaredUpClient {
     return dataStreams;
   }
 
+  async getWorkspaceScopes(workspaceId: string): Promise<WorkspaceScope[]> {
+    const url = `${this.baseUrl}/workspaces/${workspaceId}/scopes`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        apiKey: this.apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[SquaredUpClient] getWorkspaceScopes failed: ${response.status} - ${errorText}`
+      );
+      throw new Error(
+        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    return (await response.json()) as WorkspaceScope[];
+  }
+
+  async createWorkspaceScope(
+    options: CreateWorkspaceScopeOptions
+  ): Promise<WorkspaceScope> {
+    const url = `${this.baseUrl}/workspaces/${options.workspaceId}/scopes`;
+
+    const body = {
+      displayName: options.displayName,
+      content: options.content || {
+        query: options.query || "g.V()",
+      },
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        apiKey: this.apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[SquaredUpClient] createWorkspaceScope failed: ${response.status} - ${errorText}`
+      );
+      throw new Error(
+        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    return (await response.json()) as WorkspaceScope;
+  }
+
   createDataStreamTile(options: DataStreamTileOptions): SquaredUpTile {
+    // Determine scope: use provided scope, or default to workspace scope
+    const scope: { query: string } | { workspace: string; scope: string } | string[] =
+      options.scope
+        ? (options.scope as { query: string } | { workspace: string; scope: string } | string[])
+        : { query: "g.V()" }; // Default to workspace scope
+
     return {
       i: options.tileId,
       x: options.x,
       y: options.y,
       w: options.w,
       h: options.h,
-      _type: "tile/data-stream",
       config: {
+        _type: "tile/data-stream" as const,
         title: options.title,
         description: options.description,
-        visualization: options.visualization,
-        pluginConfigId: options.pluginConfigId,
-        dataStreamId: options.dataStreamId,
-        scope: options.workspaceScope
-          ? { workspaceScope: true }
-          : options.scope,
-        timeframe: options.timeframe,
+        timeframe: options.timeframe || "last24hours",
+        dataStream: {
+          pluginConfigId: options.pluginConfigId,
+          name: options.dataStreamId,
+        },
+        scope: scope,
+        visualisation: {
+          type: options.visualization,
+        },
         monitor: options.monitor,
         noBackground: options.noBackground,
         noHeader: options.noHeader,
@@ -319,17 +408,14 @@ class SquaredUpClient {
   async createDashboardTile(
     options: CreateDashboardTileOptions
   ): Promise<void> {
-    // 1. Get existing dashboard
     const dashboard = await this.getDashboard(options.dashboardId);
 
     if (dashboard.content._type !== "layout/grid") {
       throw new Error("Unsupported dashboard layout");
     }
 
-    // 2. Create tile
     const tile = this.createDataStreamTile(options);
 
-    // 3. Append tile
     const updatedDashboard: SquaredUpDashboard = {
       id: dashboard.id,
       displayName: dashboard.displayName,
@@ -340,17 +426,17 @@ class SquaredUpClient {
       },
     };
 
-    // 4. PUT updated dashboard
-    const url = `${this.baseUrl}/dashboards/${options.dashboardId}`;
-
-    const response = await fetch(url, {
-      method: "PUT",
-      headers: {
-        apiKey: this.apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedDashboard),
-    });
+    const response = await fetch(
+      `${this.baseUrl}/dashboards/${options.dashboardId}`,
+      {
+        method: "PUT",
+        headers: {
+          apiKey: this.apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedDashboard),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -664,9 +750,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
             allWorkspaces: args.allWorkspaces,
           });
 
-          console.log("returned data sources");
-
-          // Return simplified info to avoid overwhelming the LLM
           const simplified = dataSources.map((ds) => ({
             id: ds.id,
             displayName: ds.displayName,
@@ -706,6 +789,7 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           const dataStreams = await client.getPluginDataStreams({
             pluginId: args.pluginId,
           });
+
           const simplifiedDataStreams = dataStreams.map((dataStream) => ({
             displayName: dataStream.displayName,
             dataSourceName: dataStream.definition.name,
@@ -717,6 +801,7 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
               pluginId: args.pluginId,
               totalDataStreams: dataStreams.length,
               dataStreams: simplifiedDataStreams,
+              note: "When creating tiles, use the 'dataSourceName' field as the dataStreamId parameter",
             },
             null,
             2
@@ -761,7 +846,9 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           .describe("The data source ID from LIST_DATA_SOURCES"),
         dataStreamId: z
           .string()
-          .describe("The data stream name from LIST_PLUGIN_DATA_STREAMS"),
+          .describe(
+            "The data stream NAME (NOT ID) from LIST_PLUGIN_DATA_STREAMS - use 'dataSourceName' field (e.g., 'workItemsEnhanced')"
+          ),
         title: z.string().optional().describe("Tile title"),
         description: z.string().optional().describe("Tile description"),
         timeframe: z
@@ -801,9 +888,7 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           return JSON.stringify(
             {
               success: true,
-              message: `Tile "${
-                args.title || "Untitled"
-              }" created successfully on dashboard`,
+              message: `Tile "${args.title || "Untitled"}" created successfully`,
               tileId: args.tileId,
               dashboardId: args.dashboardId,
             },
@@ -812,6 +897,85 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           );
         } catch (error) {
           return `Failed to create tile: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    LIST_WORKSPACE_SCOPES: tool({
+      name: "squaredup_api_list_workspace_scopes",
+      description:
+        "List available scopes for a specific workspace. Use this to find scope IDs that can be used when creating tiles with specific data filtering.",
+      schema: z.object({
+        workspaceId: z.string().describe("The workspace ID to get scopes from"),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+          const scopes = await client.getWorkspaceScopes(args.workspaceId);
+
+          return JSON.stringify(
+            {
+              workspaceId: args.workspaceId,
+              totalScopes: scopes.length,
+              scopes: scopes.map((scope) => ({
+                id: scope.id,
+                displayName: scope.displayName,
+                query: scope.content.query,
+              })),
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to list workspace scopes: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    CREATE_WORKSPACE_SCOPE: tool({
+      name: "squaredup_api_create_workspace_scope",
+      description:
+        "Create a new scope in a workspace. Scopes define which resources are included in tiles using Gremlin queries.",
+      schema: z.object({
+        workspaceId: z
+          .string()
+          .describe("The workspace ID where the scope will be created"),
+        displayName: z.string().describe("Display name for the scope"),
+        query: z
+          .string()
+          .optional()
+          .describe(
+            "Gremlin query to define the scope (e.g., 'g.V()' for all resources). Defaults to 'g.V()'"
+          ),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+          const scope = await client.createWorkspaceScope({
+            workspaceId: args.workspaceId,
+            displayName: args.displayName,
+            query: args.query,
+          });
+
+          return JSON.stringify(
+            {
+              success: true,
+              message: `Scope "${args.displayName}" created successfully`,
+              scope: {
+                id: scope.id,
+                displayName: scope.displayName,
+                query: scope.content.query,
+              },
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to create workspace scope: ${
             error instanceof Error ? error.message : String(error)
           }`;
         }
