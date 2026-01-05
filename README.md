@@ -2,104 +2,141 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+A Model Context Protocol (MCP) server for SquaredUp, enabling AI agents to interact with SquaredUp dashboards, tiles, data sources, and monitoring data.
+
 ## Features
 
 This monorepo contains packages and apps built with TypeScript and Zod:
 
--   **@squaredup/mcp-connectors** - Connectors for SquaredUp products and features
--   **@squaredup/mcp-server** - An app for running an MCP server locally
--   **@squaredup/mcp-config-types** - Shared type definitions and configuration framework for building connectors
+- **@squaredup/mcp-connectors** - Connectors for SquaredUp products and features
+- **@squaredup/mcp-server** - An app for running an MCP server locally
+- **@squaredup/mcp-config-types** - Shared type definitions and configuration framework for building connectors
 
-## Getting Started
+## Quick Start
 
-If you want to run the connectors locally:
-
-1. **Clone the repository:**
-
-    ```bash
-    git clone https://github.com/squaredup/mcp.git
-    cd mcp
-    ```
-
-2. **Install Bun** (if you don't have it already):
-
-    **Mac/Linux:**
-    ```bash
-    curl -fsSL https://bun.sh/install | bash
-    ```
-
-    **Windows (PowerShell):**
-    ```powershell
-    powershell -c "irm bun.sh/install.ps1|iex"
-    ```
-
-3. **Install dependencies:**
-
-    ```bash
-    bun install
-    ```
-
-4. **Build the project:**
-
-    ```bash
-    bun run build
-    ```
-
-5. **Run the tests:**
-
-    ```bash
-    bun test
-    ```
-
-6. **Check out the documentation:**
-    - See the [`docs/`](./docs/) directory for detailed guides
-    - Start with [Running Locally](./docs/running-locally.md) for setup instructions
-
-## Usage
-
-This is a monorepo managed with Bun and Turbo.
-
-### Start a server from a connector
-
-**Mac/Linux/Git Bash:**
 ```bash
-# Start a test server in the background
-bun run server -- -- --connector test
+# 1. Install Bun (if needed)
+curl -fsSL https://bun.sh/install | bash  # Mac/Linux
+# OR
+powershell -c "irm bun.sh/install.ps1|iex"  # Windows
 
-# Start with credentials - production environment (credentials object schema may be different for each connector)
-bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"abcDEf", "region":"us"}'
+# 2. Install dependencies
+bun install
 
-# Start with custom base URL - for dev/staging environments
-bun run dev -- -- --connector squaredup-api --credentials '{"apiKey":"abcDEf", "region":"us", "baseUrl":"https://dev.api.squaredup.com/api"}'
-```
+# 3. Build the project
+bun run build
 
-**Windows (PowerShell):**
-```powershell
-# Start a test server in the background
-bun run server -- -- --connector test
-
-# Start with credentials - production environment (use backticks to escape quotes in PowerShell)
-bun run dev -- -- --connector squaredup-api --credentials '{`"apiKey`":`"abcDEf`",`"region`":`"us`"}'
-
-# Start with custom base URL - for dev/staging environments
-bun run dev -- -- --connector squaredup-api --credentials '{`"apiKey`":`"abcDEf`",`"region`":`"us`",`"baseUrl`":`"https://dev.api.squaredup.com/api`"}'
-
-# Alternative: Use escaped double quotes (remove baseUrl for production)
-bun run dev -- -- --connector squaredup-api --credentials '{\"apiKey\":\"abcDEf\",\"region\":\"us\",\"baseUrl\":\"https://dev.api.squaredup.com/api\"}'
+# 4. Start the server
+bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_API_KEY", "region":"us"}'
 ```
 
 Server runs at `http://localhost:3000/mcp`
 
-> **Note for Windows users:** PowerShell handles quotes differently than bash. Use either backtick escaping (`` `" ``) or backslash escaping (`\"`) for JSON credentials. Alternatively, use Git Bash for the same syntax as Mac/Linux.
+## Available Tools
+
+The SquaredUp MCP connector provides **12 tools** organized into 5 categories:
+
+### Dashboard Tools (3)
+
+- `squaredup_api_list_dashboards` - List all dashboards
+- `squaredup_api_get_dashboard_image` - Generate dashboard screenshots
+- `squaredup_api_get_dashboard_variables` - Get dashboard scope variables
+
+### Tile Tools (4)
+
+- `squaredup_api_list_tiles` - List tiles on a dashboard
+- `squaredup_api_get_tile_data` - Fetch tile data with timeframe
+- `squaredup_api_get_tile_positions` - Get tile layout positions
+- `squaredup_api_create_tile` - Add new tiles to dashboards
+
+### Data Source Tools (2)
+
+- `squaredup_api_list_data_sources` - List available data sources
+- `squaredup_api_list_plugin_data_streams` - Get data streams for a plugin
+
+### Scope Tools (2)
+
+- `squaredup_api_list_workspace_scopes` - List scopes in a workspace
+- `squaredup_api_create_workspace_scope` - Create new scopes
+
+### Example Prompts
+
+- "Show me all my dashboards"
+- "Add a CPU usage tile to my Production dashboard"
+- "Create a CSV table tile with my sales data"
+- "Get the latest metrics from my monitoring dashboard"
+- "Create me a new tile in my Work dashboard using the Jira Plugin and Work Items data streams - scope it to the Atlas team"
+
+See [docs/squaredup-api-methods.md](./docs/squaredup-api-methods.md) for detailed tool documentation.
+
+## Usage Examples
+
+**Mac/Linux/Git Bash:**
+
+```bash
+# Start server with production API
+bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_KEY", "region":"us"}'
+
+# Start with dev/staging environment
+bun run dev -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_KEY", "region":"us", "baseUrl":"https://dev.api.squaredup.com/api"}'
+```
+
+**Windows (PowerShell):**
+
+```powershell
+# Use backtick escaping for JSON in PowerShell
+bun run server -- -- --connector squaredup-api --credentials '{`"apiKey`":`"YOUR_KEY`",`"region`":`"us`"}'
+```
+
+## Codebase Structure
+
+```
+squaredup-mcp/
+├── packages/
+│   ├── mcp-connectors/
+│   │   ├── src/
+│   │   │   ├── connectors/
+│   │   │   │   └── squaredup-api.ts          # MCP tool definitions (12 tools)
+│   │   │   ├── lib/
+│   │   │   │   └── squaredup-client.ts       # SquaredUp API client
+│   │   │   └── types/
+│   │   │       └── squaredup/
+│   │   │           └── types.ts              # SquaredUp type definitions
+│   │   └── package.json
+│   ├── mcp-config-types/                     # Shared connector framework
+│   └── mcp-server/                           # HTTP server implementation
+├── apps/
+│   └── mcp-server/                           # Server application
+│       ├── src/
+│       │   └── index.ts                      # Hono HTTP server
+│       └── logs/                             # Server logs
+└── docs/                                     # Documentation
+```
 
 ## Available Connectors
 
-| Connector       | Description                                       | Credentials                                                    |
-| --------------- | ------------------------------------------------- | -------------------------------------------------------------- |
-| `test`          | Simple test connector for development and testing | `apiKey`, `someSetting`                                        |
+| Connector       | Description                                       | Credentials                                                       |
+| --------------- | ------------------------------------------------- | ----------------------------------------------------------------- |
+| `test`          | Simple test connector for development and testing | `apiKey`, `someSetting`                                           |
 | `squaredup-api` | Tools to work with SquaredUp dashboards and data  | `apiKey`, `region` (us/eu), `baseUrl` (optional, for dev/staging) |
 
-See [SquaredUp API Methods](./docs/squaredup-api-methods.md) for details on available and planned API tools.
+## Documentation
+
+- [Running Locally](./docs/running-locally.md) - Setup and development guide
+- [SquaredUp API Tools](./docs/squaredup-api-methods.md) - Complete tool reference
+
+## Development
+
+```bash
+# Run tests
+bun test
+
+# Build all packages
+bun run build
+
+# Development mode with auto-reload
+bun run dev -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_KEY", "region":"us"}'
+```
 
 ## License
 
