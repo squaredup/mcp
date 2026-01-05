@@ -13,7 +13,7 @@ export interface DashboardTileContent {
 
 export interface DashboardContent {
   _type: "layout/grid" | "layout/list";
-  version: number;
+  version: number | undefined;
   columns: number;
   contents: DashboardTileContent[];
 }
@@ -718,20 +718,3 @@ export type VariableId = {
   _type: "variable";
   value: string;
 };
-
-// ============================================
-// DASHBOARD VARIABLES
-// ============================================
-
-interface DashboardVariable {
-  id: string;
-  name: string;
-  scope: DataStreamWorkspaceScope | DataStreamGremlinScope;
-  selectedObjects: {
-    id: string;
-    name: string;
-  }[];
-  selectedAll: boolean;
-  allowMultipleSelection: boolean;
-  default: "all" | "none";
-}

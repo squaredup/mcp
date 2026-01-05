@@ -232,6 +232,55 @@ export class SquaredUpClient {
     return (await response.json()) as SquaredUpDashboard;
   }
 
+  async createDashboard(
+    dashboard: Omit<SquaredUpDashboard, "id">
+  ): Promise<string> {
+    const response = await fetch(`${this.baseUrl}/dashboards`, {
+      method: "POST",
+      headers: {
+        apiKey: this.apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dashboard),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[SquaredUpClient] createDashboard failed: ${response.status} - ${errorText}`
+      );
+      throw new Error(
+        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+
+    return (await response.json()) as string;
+  }
+
+  async updateDashboard(
+    dashboardId: string,
+    dashboard: SquaredUpDashboard
+  ): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/dashboards/${dashboardId}`, {
+      method: "PUT",
+      headers: {
+        apiKey: this.apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dashboard),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(
+        `[SquaredUpClient] updateDashboard failed: ${response.status} - ${errorText}`
+      );
+      throw new Error(
+        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
+      );
+    }
+  }
+
   async getDashboardVariables(
     dashboardId: string
   ): Promise<DashboardVariable[]> {

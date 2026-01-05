@@ -1,10 +1,13 @@
 import { mcpConnectorConfig } from "@squaredup/mcp-config-types";
 import { z } from "zod";
-import type { TimeframeEnumValue } from "../types/squaredup/types";
 import {
   SquaredUpClient,
   type VisualizationType,
 } from "../lib/squaredup-client";
+import type {
+  TimeframeEnumValue,
+  SquaredUpDashboard,
+} from "../types/squaredup/types";
 
 export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
   name: "SquaredUp API",
@@ -108,6 +111,149 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           );
         } catch (error) {
           return `Failed to get dashboard variables: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    GET_DASHBOARD: tool({
+      name: "squaredup_api_get_dashboard",
+      description:
+        "Get full details of a specific dashboard including all tiles, layout, and configuration.",
+      schema: z.object({
+        dashboardId: z.string().describe("The dashboard ID"),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+          const dashboard = await client.getDashboard(args.dashboardId);
+          return JSON.stringify(dashboard, null, 2);
+        } catch (error) {
+          return `Failed to get dashboard: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    CREATE_DASHBOARD: tool({
+      name: "squaredup_api_create_dashboard",
+      description:
+        "Create a new dashboard in a workspace. Returns the new dashboard ID.",
+      schema: z.object({
+        displayName: z.string().describe("Dashboard display name"),
+        workspaceId: z.string().describe("Workspace ID to create in"),
+        content: z
+          .object({
+            _type: z.enum(["layout/grid", "layout/list"]),
+            version: z.number().optional(),
+            columns: z.number().optional(),
+            contents: z.array(z.any()).optional(),
+          })
+          .optional()
+          .describe(
+            'Dashboard content structure. Defaults to empty grid: {"_type":"layout/grid","version":2,"columns":12,"contents":[]}'
+          ),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+
+          const dashboard = {
+            displayName: args.displayName,
+            workspaceId: args.workspaceId,
+            content: args.content || {
+              _type: "layout/grid" as const,
+              version: 2,
+              columns: 12,
+              contents: [],
+            },
+          };
+
+          const dashboardId = await client.createDashboard(dashboard);
+
+          return JSON.stringify(
+            {
+              success: true,
+              message: `Dashboard "${args.displayName}" created successfully`,
+              dashboardId: dashboardId,
+              workspaceId: args.workspaceId,
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to create dashboard: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        }
+      },
+    }),
+    UPDATE_DASHBOARD: tool({
+      name: "squaredup_api_update_dashboard",
+      description:
+        "Update an existing dashboard's properties (name, layout, tiles, etc). Use GET_DASHBOARD first to get current state.",
+      schema: z.object({
+        dashboardId: z.string().describe("The dashboard ID to update"),
+        displayName: z
+          .string()
+          .optional()
+          .describe("New dashboard display name"),
+        workspaceId: z
+          .string()
+          .optional()
+          .describe("New workspace ID (to move dashboard)"),
+        content: z
+          .object({
+            _type: z.enum(["layout/grid", "layout/list"]),
+            version: z.number().optional(),
+            columns: z.number().optional(),
+            contents: z.array(z.any()).optional(),
+          })
+          .optional()
+          .describe("Updated dashboard content structure"),
+      }),
+      handler: async (args, context) => {
+        try {
+          const { apiKey, region, baseUrl } = await context.getCredentials();
+          const client = new SquaredUpClient(apiKey, region, baseUrl);
+
+          // Get current dashboard first
+          const currentDashboard = await client.getDashboard(args.dashboardId);
+
+          // Build updated content with all required fields
+          const updatedContent = args.content
+            ? {
+                _type: args.content._type,
+                version: args.content.version ?? currentDashboard.content.version,
+                columns: args.content.columns ?? currentDashboard.content.columns,
+                contents: args.content.contents ?? currentDashboard.content.contents,
+              }
+            : currentDashboard.content;
+
+          // Update with provided values or keep existing
+          const updatedDashboard: SquaredUpDashboard = {
+            ...currentDashboard,
+            id: args.dashboardId,
+            displayName: args.displayName || currentDashboard.displayName,
+            workspaceId: args.workspaceId || currentDashboard.workspaceId,
+            content: updatedContent,
+          };
+
+          await client.updateDashboard(args.dashboardId, updatedDashboard);
+
+          return JSON.stringify(
+            {
+              success: true,
+              message: `Dashboard "${updatedDashboard.displayName}" updated successfully`,
+              dashboardId: args.dashboardId,
+            },
+            null,
+            2
+          );
+        } catch (error) {
+          return `Failed to update dashboard: ${
             error instanceof Error ? error.message : String(error)
           }`;
         }
