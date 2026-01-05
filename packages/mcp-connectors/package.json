@@ -23,7 +23,9 @@
         "@modelcontextprotocol/sdk": "catalog:",
         "@orama/orama": "^3.1.16",
         "@squaredup/mcp-config-types": "workspace:*",
+        "@types/uuid": "^11.0.0",
         "modal": "^0.3.25",
+        "uuid": "^13.0.0",
         "zod": "catalog:"
     },
     "devDependencies": {
