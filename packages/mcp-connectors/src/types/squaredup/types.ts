@@ -134,6 +134,7 @@ export type ScopeType = "single" | "list" | "none";
 // ============================================
 
 export interface DataStream {
+  id: string;
   name: string;
   displayName: string;
   definition: DataStreamDefinition;
@@ -722,7 +723,7 @@ export type VariableId = {
 // DASHBOARD VARIABLES
 // ============================================
 
-export interface DashboardVariable {
+interface DashboardVariable {
   id: string;
   name: string;
   scope: DataStreamWorkspaceScope | DataStreamGremlinScope;
