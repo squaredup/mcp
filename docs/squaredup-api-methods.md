@@ -2,15 +2,18 @@
 
 Complete reference for all MCP tools provided by the SquaredUp connector.
 
-## Currently Implemented
+## Currently Implemented (15 Tools)
 
-### Dashboard Tools
+### Dashboard Tools (6)
 
-| Tool Name                               | Description                                     | Parameters                   |
-| --------------------------------------- | ----------------------------------------------- | ---------------------------- |
-| `squaredup_api_list_dashboards`         | List all dashboards in your organization        | None                         |
-| `squaredup_api_get_dashboard_image`     | Generate a dashboard screenshot                 | `workspaceId`, `dashboardId` |
-| `squaredup_api_get_dashboard_variables` | Get dashboard scope variables for tile creation | `dashboardId`                |
+| Tool Name                               | Description                                     | Parameters                                                |
+| --------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
+| `squaredup_api_list_dashboards`         | List all dashboards in your organization        | None                                                      |
+| `squaredup_api_get_dashboard`           | Get full details of a specific dashboard        | `dashboardId`                                             |
+| `squaredup_api_create_dashboard`        | Create a new dashboard in a workspace           | `displayName`, `workspaceId`, `content?`                  |
+| `squaredup_api_update_dashboard`        | Update dashboard properties                     | `dashboardId`, `displayName?`, `workspaceId?`, `content?` |
+| `squaredup_api_get_dashboard_image`     | Generate a dashboard screenshot                 | `workspaceId`, `dashboardId`                              |
+| `squaredup_api_get_dashboard_variables` | Get dashboard scope variables for tile creation | `dashboardId`                                             |
 
 ### Tile Tools
 
@@ -66,12 +69,6 @@ Common timeframe options:
 
 Future tool additions being considered:
 
-### Phase 2 - Extended Dashboard Operations
-
-- `squaredup_api_get_dashboard` - Get full dashboard details
-- `squaredup_api_update_dashboard` - Update dashboard properties
-- `squaredup_api_create_dashboard` - Create new dashboards
-
 ### Phase 3 - Health & Monitoring
 
 - `squaredup_api_get_health_rollup` - Dashboard/workspace health status
@@ -95,9 +92,9 @@ See the full API reference in this document for all available endpoints.
 | Method | Path                   | Description                | Priority    |
 | ------ | ---------------------- | -------------------------- | ----------- |
 | GET    | /dashboards            | List all dashboards        | Implemented |
-| GET    | /dashboards/{id}       | Get dashboard by ID        | High        |
-| POST   | /dashboards            | Create dashboard           | Medium      |
-| PUT    | /dashboards/{id}       | Update dashboard           | Medium      |
+| GET    | /dashboards/{id}       | Get dashboard by ID        | Implemented |
+| POST   | /dashboards            | Create dashboard           | Implemented |
+| PUT    | /dashboards/{id}       | Update dashboard           | Implemented |
 | DELETE | /dashboards/{id}       | Delete dashboard           | Low         |
 | PUT    | /dashboards/{id}/clone | Clone dashboard            | Medium      |
 | POST   | /dashboards/delete     | Bulk delete dashboards     | Low         |
@@ -129,16 +126,16 @@ See the full API reference in this document for all available endpoints.
 
 ### Variables
 
-| Method | Path                       | Description                | Priority |
-| ------ | -------------------------- | -------------------------- | -------- |
-| GET    | /workspaces/{id}/variables | List workspace variables   | Medium   |
-| GET    | /dashboards/{id}/variables | List dashboard variables   | Medium   |
-| POST   | /workspaces/{id}/variables | Create variable            | Medium   |
-| GET    | /variables/{id}            | Get variable               | Medium   |
-| PUT    | /variables/{id}            | Update variable            | Medium   |
-| DELETE | /variables/{id}            | Delete variable            | Low      |
-| POST   | /variables/objects         | List variables for objects | Low      |
-| GET    | /variables/objects/ids     | Get variable object IDs    | Low      |
+| Method | Path                       | Description                | Priority    |
+| ------ | -------------------------- | -------------------------- | ----------- |
+| GET    | /workspaces/{id}/variables | List workspace variables   | Medium      |
+| GET    | /dashboards/{id}/variables | List dashboard variables   | Implemented |
+| POST   | /workspaces/{id}/variables | Create variable            | Medium      |
+| GET    | /variables/{id}            | Get variable               | Medium      |
+| PUT    | /variables/{id}            | Update variable            | Medium      |
+| DELETE | /variables/{id}            | Delete variable            | Low         |
+| POST   | /variables/objects         | List variables for objects | Low         |
+| GET    | /variables/objects/ids     | Get variable object IDs    | Low         |
 
 ### Dashboard Images
 

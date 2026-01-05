@@ -34,11 +34,14 @@ Server runs at `http://localhost:3000/mcp`
 
 ## Available Tools
 
-The SquaredUp MCP connector provides **12 tools** organized into 5 categories:
+The SquaredUp MCP connector provides **15 tools** organized into 5 categories:
 
-### Dashboard Tools (3)
+### Dashboard Tools (6)
 
 - `squaredup_api_list_dashboards` - List all dashboards
+- `squaredup_api_get_dashboard` - Get full dashboard details
+- `squaredup_api_create_dashboard` - Create new dashboards
+- `squaredup_api_update_dashboard` - Update dashboard properties
 - `squaredup_api_get_dashboard_image` - Generate dashboard screenshots
 - `squaredup_api_get_dashboard_variables` - Get dashboard scope variables
 
@@ -62,6 +65,8 @@ The SquaredUp MCP connector provides **12 tools** organized into 5 categories:
 ### Example Prompts
 
 - "Show me all my dashboards"
+- "Create a new dashboard called 'Q1 Metrics' in my Production workspace"
+- "Rename my dashboard to 'DevOps Monitoring'"
 - "Add a CPU usage tile to my Production dashboard"
 - "Create a CSV table tile with my sales data"
 - "Get the latest metrics from my monitoring dashboard"
