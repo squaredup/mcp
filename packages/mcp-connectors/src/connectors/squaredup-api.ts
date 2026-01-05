@@ -1,676 +1,10 @@
 import { mcpConnectorConfig } from "@squaredup/mcp-config-types";
 import { z } from "zod";
-import type {
-  DataStream,
-  PluginConfig,
-  SquaredUpDashboard,
-  TileConfig,
-  TimeframeEnumValue,
-} from "../types/squaredup/types";
-
-type VisualizationType =
-  | "data-stream-table"
-  | "data-stream-line-graph"
-  | "data-stream-bar-chart"
-  | "data-stream-gauge"
-  | "data-stream-scalar"
-  | "data-stream-blocks"
-  | "data-stream-donut-chart";
-
-// Tile configuration for data stream tiles (CORRECT SQUAREDUP FORMAT)
-interface DataStreamTileConfig {
-  _type: "tile/data-stream"; // Inside config, not at tile level!
-  title?: string;
-  description?: string;
-  timeframe?: TimeframeEnumValue;
-  variables?: string[]; // Dashboard variables this tile uses
-  dataStream: {
-    // Nested object
-    pluginConfigId?: string; // Optional when using dataSourceConfig
-    name?: string; // Use NAME not ID! Server resolves name to ID automatically
-    id?: string; // Data stream ID - required for CSV tiles
-    dataSourceConfig?: {
-      // For CSV tiles and other inline data sources
-      string?: string; // CSV data or other inline data
-      options?: Record<string, unknown>; // Options like {"header": "selected"}
-    };
-  };
-  scope:
-    | { query: string }
-    | { workspace: string; scope: string }
-    | { variable: string; workspace: string; scope: string } // Variable-based scope
-    | string[]
-    | {
-        query: string;
-        bindings?: Record<string, string[]>;
-        queryDetail?: { ids: string[] };
-      }; // REQUIRED! Can include bindings for CSV tiles
-  visualisation: {
-    // UK spelling, object not string!
-    type: VisualizationType;
-    config?: Record<string, unknown>;
-  };
-  activePluginConfigIds?: string[]; // Required for CSV tiles and variable-based tiles
-  monitor?: unknown;
-  noBackground?: boolean;
-  noHeader?: boolean;
-}
-
-// Complete tile structure
-interface SquaredUpTile {
-  i: string; // Unique tile ID
-  x: number; // Grid x position
-  y: number; // Grid y position
-  w: number; // Width
-  h: number; // Height
-  config: DataStreamTileConfig;
-  static?: boolean;
-  moved?: boolean;
-  z?: number;
-}
-
-// Creating a data stream tile options
-interface DataStreamTileOptions {
-  tileId: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  visualization: VisualizationType;
-  pluginConfigId?: string; // Optional when using dataSourceConfig
-  dataStreamName?: string; // Data stream name
-  dataStreamId?: string; // Data stream ID (for built-in streams like CSV)
-  workspaceScope?: boolean;
-  scope?: Record<string, unknown>;
-  title?: string;
-  description?: string;
-  timeframe?: TimeframeEnumValue;
-  monitor?: unknown;
-  noBackground?: boolean;
-  noHeader?: boolean;
-  // Configuration for inline data sources (CSV, etc.)
-  dataSourceConfig?: {
-    string?: string; // CSV data or other inline data
-    options?: Record<string, unknown>; // Options like {"header": "selected"}
-  };
-  // Configuration for visualization (overrides defaults)
-  visualizationConfig?: Record<string, unknown>;
-  // CSV-specific fields
-  csvDataStreamId?: string; // The built-in CSV data stream ID (e.g., "datastream-EcvxqnK5urc9lP9BwPCr")
-  csvNodeId?: string; // The node ID for CSV data source
-  csvPluginConfigId?: string; // The plugin config ID for CSV tiles
-  // Variable-based scope fields
-  variableId?: string; // Dashboard variable ID to use for scope
-  workspaceId?: string; // Workspace ID for variable-based scope
-  scopeId?: string; // Scope ID for variable-based scope
-}
-
-// Creating a tile on a dashboard options
-interface CreateDashboardTileOptions extends DataStreamTileOptions {
-  dashboardId: string;
-}
-
-// Simplified dashboard info for listing
-interface DashboardListItem {
-  dashboardId: string;
-  displayName: string;
-  description: string;
-  workspaceId: string;
-}
-
-interface SquaredUpImageUrl {
-  url: string;
-}
-
-// Workspace scope interfaces
-interface WorkspaceScope {
-  id: string;
-  displayName: string;
-  data?: {
-    query?: string; // Gremlin query (dynamic scopes only)
-    queryDetail?: string; // JSON string with details
-    bindings?: string; // JSON string with bindings
-    isDynamic?: boolean;
-    [key: string]: unknown;
-  };
-}
-
-// Simplified scope info for LLM (minimal tokens)
-interface ScopeInfo {
-  id: string;
-  displayName: string;
-  type: "dynamic" | "fixed" | "unknown";
-  objectCount: number | "dynamic";
-  hasQuery: boolean;
-}
-
-interface CreateWorkspaceScopeOptions {
-  workspaceId: string;
-  displayName: string;
-  query?: string;
-  quickScope?: boolean;
-  queryDetail?: Record<string, unknown>;
-}
-
-// Dashboard variable interfaces
-// Actual API response structure from GET /dashboards/:id/variables
-interface DashboardVariable {
-  variable: {
-    id: string; // e.g., "var-SbdgNf8UrQrNqo8Yjvkm"
-    type: string;
-    displayName: string;
-    tenant: string;
-    configId: string;
-    data: unknown;
-    workspaceId: string; // e.g., "space-uiD4yBLeCS05o2sAkZbY"
-  };
-  scope: {
-    id: string; // e.g., "scope-zocGojlcDrbmndhs3zOK"
-  };
-}
-
-class SquaredUpClient {
-  private apiKey: string;
-  private baseUrl: string;
-  private prefix: string = "";
-
-  constructor(apiKey: string, region: string, customBaseUrl?: string) {
-    this.apiKey = apiKey;
-
-    // Use custom base URL if provided, otherwise use default with region
-    if (customBaseUrl) {
-      this.baseUrl = customBaseUrl;
-    } else {
-      this.prefix = region !== "us" ? `${region}.` : "";
-      this.baseUrl = `https://${this.prefix}api.squaredup.com/api`;
-    }
-  }
-
-  async listDashboards(): Promise<DashboardListItem[]> {
-    const response = await fetch(`${this.baseUrl}/dashboards`, {
-      method: "GET",
-      headers: {
-        apiKey: this.apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] listDashboards failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    const result = (await response.json()) as SquaredUpDashboard[];
-
-    return result.map((dashboard) => ({
-      dashboardId: dashboard.id,
-      displayName: dashboard.displayName,
-      description: `A dashboard with ID '${dashboard.id}' and workspace ID '${dashboard.workspaceId}`,
-      workspaceId: dashboard.workspaceId,
-    }));
-  }
-
-  async getDashboard(dashboardId: string): Promise<SquaredUpDashboard> {
-    const response = await fetch(`${this.baseUrl}/dashboards/${dashboardId}`, {
-      method: "GET",
-      headers: {
-        apiKey: this.apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] getDashboard failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    return (await response.json()) as SquaredUpDashboard;
-  }
-
-  async getDashboardVariables(
-    dashboardId: string
-  ): Promise<DashboardVariable[]> {
-    const response = await fetch(
-      `${this.baseUrl}/dashboards/${dashboardId}/variables`,
-      {
-        method: "GET",
-        headers: {
-          apiKey: this.apiKey,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] getDashboardVariables failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    return (await response.json()) as DashboardVariable[];
-  }
-
-  async getDashboardImage(
-    workspaceId: string,
-    dashboardId: string
-  ): Promise<SquaredUpImageUrl> {
-    const response = await fetch(
-      `${this.baseUrl}/generate/${workspaceId}/${dashboardId}`,
-      {
-        method: "POST",
-        headers: {
-          apiKey: this.apiKey,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const result = (await response.json()) as string;
-    return { url: result };
-  }
-
-  async getTileData(
-    tileConfig: unknown,
-    timeframe: TimeframeEnumValue,
-    workspaceId?: string,
-    dashboardId?: string
-  ): Promise<TileConfig> {
-    const requestBody: {
-      tileConfig: unknown;
-      timeframe: string | object;
-      context?: { dashboard?: { id: string; workspaceId: string } };
-    } = {
-      tileConfig,
-      timeframe,
-    };
-
-    // Add context if dashboard info is provided
-    if (workspaceId && dashboardId) {
-      requestBody.context = {
-        dashboard: {
-          id: dashboardId,
-          workspaceId: workspaceId,
-        },
-      };
-    }
-
-    const response = await fetch(`${this.baseUrl}/tiledata`, {
-      method: "POST",
-      headers: {
-        apiKey: this.apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] getTileData failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    return (await response.json()) as TileConfig;
-  }
-
-  async getDataSources(options?: {
-    workspaceId?: string;
-    allWorkspaces?: boolean;
-    forAdministration?: boolean;
-  }): Promise<PluginConfig[]> {
-    const params = new URLSearchParams();
-
-    if (options?.workspaceId) {
-      params.append("workspaceId", options.workspaceId);
-    }
-
-    if (options?.allWorkspaces) {
-      params.append("allWorkspaces", "true");
-    }
-
-    if (options?.forAdministration) {
-      params.append("forAdministration", "true");
-    }
-
-    const url = `${this.baseUrl}/datasources${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        apiKey: this.apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] getDataSources failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    return response.json() as Promise<PluginConfig[]>;
-  }
-
-  async getPluginDataStreams(options: {
-    pluginId: string;
-    workspaceId?: string;
-  }): Promise<DataStream[]> {
-    const params = new URLSearchParams();
-    if (options.workspaceId) {
-      params.append("workspaceId", options.workspaceId);
-    }
-
-    const url = `${this.baseUrl}/datastreams/plugin/${options.pluginId}${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        apiKey: this.apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] getPluginDataStreams failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    // Ensure we only give relevant data to the LLM to avoid large context
-    const dataStreams = (await response.json()) as DataStream[];
-
-    return dataStreams;
-  }
-
-  async getWorkspaceScopes(workspaceId: string): Promise<ScopeInfo[]> {
-    const url = `${this.baseUrl}/workspaces/${workspaceId}/scopes`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        apiKey: this.apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] getWorkspaceScopes failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    const scopes = (await response.json()) as WorkspaceScope[];
-
-    // Process scopes to return only essential info for LLM
-    return scopes.map((scope) => {
-      const data = scope.data || {};
-
-      // Determine scope type and count
-      let scopeType: "dynamic" | "fixed" | "unknown" = "unknown";
-      let objectCount: number | "dynamic" = "dynamic";
-
-      // Try to parse queryDetail to get object info
-      let queryDetail: any = {};
-      try {
-        queryDetail = data.queryDetail ? JSON.parse(data.queryDetail) : {};
-      } catch {
-        // If parsing fails, keep as empty object
-      }
-
-      // Fixed scope if it has a list of IDs
-      if (queryDetail.ids?.length > 0 || queryDetail.list?.length > 0) {
-        scopeType = "fixed";
-        objectCount = (queryDetail.ids || queryDetail.list).length;
-      } else if (data.query) {
-        scopeType = "dynamic";
-      }
-
-      return {
-        id: scope.id,
-        displayName: scope.displayName || scope.id,
-        type: scopeType,
-        objectCount: objectCount,
-        hasQuery: !!data.query,
-      };
-    });
-  }
-
-  async createWorkspaceScope(
-    options: CreateWorkspaceScopeOptions
-  ): Promise<string> {
-    const url = `${this.baseUrl}/workspaces/${options.workspaceId}/scopes`;
-
-    // FIXED: API expects { scope: { name, query, ... } } not just the scope object
-    const body = {
-      scope: {
-        name: options.displayName,
-        query: options.query || "g.V()",
-        quickScope: options.quickScope || false,
-        queryDetail: options.queryDetail || {},
-      },
-    };
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        apiKey: this.apiKey,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] createWorkspaceScope failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `SquaredUp API error: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-
-    // API returns the scope ID as a string
-    return (await response.json()) as string;
-  }
-
-  createDataStreamTile(options: DataStreamTileOptions): SquaredUpTile {
-    const isCSVTile = !!options.dataSourceConfig;
-    const isVariableBasedTile = !!options.variableId;
-
-    // Build scope
-    let scope: DataStreamTileConfig["scope"];
-
-    if (isCSVTile) {
-      // CSV tiles need specific scope with bindings
-      const bindingKey = `ids_${this.generateRandomString(20)}`;
-      const nodeId =
-        options.csvNodeId ||
-        "node-1dwkxV4HX7setr3IV7aTF5B9hyJyqKtuijTDo-VRiSCiS2cF7ykmGfY9kn";
-
-      scope = {
-        query: `g.V().has('id', within(${bindingKey}))`,
-        bindings: {
-          [bindingKey]: [nodeId],
-        },
-        queryDetail: {
-          ids: [nodeId],
-        },
-      };
-    } else if (isVariableBasedTile && options.workspaceId && options.scopeId) {
-      // Variable-based tiles reference dashboard variables
-      scope = {
-        variable: options.variableId!,
-        workspace: options.workspaceId,
-        scope: options.scopeId,
-      };
-    } else {
-      // Regular tiles use simple scope or custom scope
-      scope = options.scope
-        ? (options.scope as DataStreamTileConfig["scope"])
-        : { query: "g.V()" };
-    }
-
-    // Build dataStream object
-    const dataStream: DataStreamTileConfig["dataStream"] = {};
-
-    if (isCSVTile) {
-      // CSV tiles need name, id, and dataSourceConfig
-      dataStream.name = "rawText";
-      dataStream.id =
-        options.csvDataStreamId || "datastream-EcvxqnK5urc9lP9BwPCr";
-      dataStream.dataSourceConfig = options.dataSourceConfig;
-    } else {
-      // Regular tiles need pluginConfigId and name
-      if (options.pluginConfigId) {
-        dataStream.pluginConfigId = options.pluginConfigId;
-      }
-      // Use dataStreamName if provided, otherwise fallback to dataStreamId
-      if (options.dataStreamName) {
-        dataStream.name = options.dataStreamName;
-      } else if (options.dataStreamId) {
-        // If only ID is provided (for built-in streams), use id
-        dataStream.id = options.dataStreamId;
-      }
-    }
-
-    // Build visualization config
-    let visualisationConfig: Record<string, unknown> | undefined;
-    if (options.visualizationConfig) {
-      // Nest config under visualization type name
-      visualisationConfig = {
-        [options.visualization]: options.visualizationConfig,
-      };
-    }
-
-    const config: DataStreamTileConfig = {
-      _type: "tile/data-stream" as const,
-      title: options.title,
-      description: options.description,
-      timeframe: options.timeframe || "last24hours",
-      dataStream: dataStream,
-      scope: scope,
-      visualisation: {
-        type: options.visualization,
-        config: visualisationConfig,
-      },
-      monitor: options.monitor,
-      noBackground: options.noBackground,
-      noHeader: options.noHeader,
-    };
-
-    // Add variables for variable-based tiles
-    if (isVariableBasedTile && options.variableId) {
-      config.variables = [options.variableId];
-    }
-
-    // Add activePluginConfigIds for CSV tiles and variable-based tiles
-    if (isCSVTile) {
-      config.activePluginConfigIds = [
-        options.csvPluginConfigId || "config-VRiSCiS2cF7ykmGfY9kn",
-      ];
-    } else if (isVariableBasedTile && options.pluginConfigId) {
-      config.activePluginConfigIds = [options.pluginConfigId];
-    }
-
-    const tile: SquaredUpTile = {
-      i: options.tileId,
-      x: options.x,
-      y: options.y,
-      w: options.w,
-      h: options.h,
-      config: config,
-    };
-
-    return tile;
-  }
-
-  // Helper to generate random strings for binding keys
-  private generateRandomString(length: number): string {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  }
-
-  async createDashboardTile(
-    options: CreateDashboardTileOptions
-  ): Promise<void> {
-    const dashboard = await this.getDashboard(options.dashboardId);
-
-    if (dashboard.content._type !== "layout/grid") {
-      throw new Error("Unsupported dashboard layout");
-    }
-
-    const tile = this.createDataStreamTile(options);
-
-    const updatedDashboard: SquaredUpDashboard = {
-      id: dashboard.id,
-      displayName: dashboard.displayName,
-      workspaceId: dashboard.workspaceId,
-      content: {
-        ...dashboard.content,
-        contents: [...dashboard.content.contents, tile],
-      },
-    };
-
-    const response = await fetch(
-      `${this.baseUrl}/dashboards/${options.dashboardId}`,
-      {
-        method: "PUT",
-        headers: {
-          apiKey: this.apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedDashboard),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[SquaredUpClient] createDashboardTile failed: ${response.status} - ${errorText}`
-      );
-      throw new Error(
-        `Failed to update dashboard: ${response.status} ${response.statusText} - ${errorText}`
-      );
-    }
-  }
-}
+import type { TimeframeEnumValue } from "../types/squaredup/types";
+import {
+  SquaredUpClient,
+  type VisualizationType,
+} from "../lib/squaredup-client";
 
 export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
   name: "SquaredUp API",
@@ -760,8 +94,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
               dashboardId: args.dashboardId,
               totalVariables: variables.length,
               variables: variables.map((v) => {
-                // API returns: { variable: {...}, scope: {id: "scope-xxx"} }
-                // Extract the IDs needed for CREATE_TILE
                 return {
                   variableId: v.variable.id,
                   displayName: v.variable.displayName,
@@ -867,7 +199,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
 
           const results = [];
 
-          // Fetch data for each requested tile
           for (const index of args.tileIndices) {
             const tile = dashboard.content.contents[index];
 
@@ -956,7 +287,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
             });
           }
 
-          // Extract only positioning info - no heavy config data
           const positions = dashboard.content.contents.map((tile) => {
             const tileConfig = tile.config as { title?: string };
             return {
@@ -1170,7 +500,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
       description:
         'Create a new tile on a dashboard. IMPORTANT: You MUST gather all required IDs first by calling other tools in this sequence: 1) LIST_DASHBOARDS (if user provided dashboard name), 2) LIST_DATA_SOURCES (if user provided data source name), 3) LIST_PLUGIN_DATA_STREAMS (to get data stream name), 4) GET_TILE_POSITIONS (to find free space), then 5) CREATE_TILE with all the collected IDs. For CSV tiles use dataStreamName="rawText" and provide csvData.',
       schema: z.object({
-        // Required IDs - must be obtained from other tools first
         dashboardId: z
           .string()
           .describe("The dashboard ID from LIST_DASHBOARDS"),
@@ -1179,14 +508,10 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           .describe(
             "Unique tile ID - generate random string like 'tile-' + random chars"
           ),
-
-        // Positioning
         x: z.number().describe("Grid X position (0-based)"),
         y: z.number().describe("Grid Y position (0-based)"),
         w: z.number().describe("Tile width in grid units (typically 4-8)"),
         h: z.number().describe("Tile height in grid units (typically 3-4)"),
-
-        // Visualization
         visualization: z
           .enum([
             "data-stream-table",
@@ -1196,26 +521,20 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
             "data-stream-scalar",
             "data-stream-blocks",
             "data-stream-donut-chart",
-          ])
+          ] as const)
           .describe("Visualization type"),
-
-        // Data source (get from LIST_DATA_SOURCES)
         pluginConfigId: z
           .string()
           .optional()
           .describe(
             "Data source ID from LIST_DATA_SOURCES (skip for CSV tiles)"
           ),
-
-        // Data stream (get from LIST_PLUGIN_DATA_STREAMS)
         dataStreamName: z
           .string()
           .optional()
           .describe(
             "Data stream name from LIST_PLUGIN_DATA_STREAMS. For CSV tiles use 'rawText'"
           ),
-
-        // Tile content
         title: z.string().optional().describe("Tile title"),
         description: z.string().optional().describe("Tile description"),
         timeframe: z
@@ -1224,8 +543,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           .describe(
             "Timeframe (e.g., 'last1hour', 'last24hours'). Use 'none' for CSV tiles"
           ),
-
-        // CSV-specific
         csvData: z
           .string()
           .optional()
@@ -1236,16 +553,12 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           .record(z.unknown())
           .optional()
           .describe('CSV options like {"header": "selected"}'),
-
-        // Visualization config
         visualizationConfig: z
           .record(z.unknown())
           .optional()
           .describe(
             'Viz config like {"xAxisColumn": "timestamp", "yAxisColumn": ["cpu"]} for line graphs, or {"valueColumn": "count", "labelColumn": "status"} for donuts'
           ),
-
-        // Variable-based scope (get from GET_DASHBOARD_VARIABLES)
         variableId: z
           .string()
           .optional()
@@ -1266,7 +579,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
           const { apiKey, region, baseUrl } = await context.getCredentials();
           const client = new SquaredUpClient(apiKey, region, baseUrl);
 
-          // Build dataSourceConfig for CSV tiles
           const dataSourceConfig = args.csvData
             ? {
                 string: args.csvData,
@@ -1281,7 +593,7 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
             y: args.y,
             w: args.w,
             h: args.h,
-            visualization: args.visualization,
+            visualization: args.visualization as VisualizationType,
             pluginConfigId: args.pluginConfigId,
             dataStreamName: args.dataStreamName,
             title: args.title,
@@ -1318,7 +630,6 @@ export const SquaredUpApiConnectorConfig = mcpConnectorConfig({
   }),
 });
 
-// Re-export types for backwards compatibility
 export type SquaredUpCredentials = z.infer<
   typeof SquaredUpApiConnectorConfig.credentials
 >;
