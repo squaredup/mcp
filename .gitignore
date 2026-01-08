@@ -44,3 +44,4 @@ logs/
 
 # Windows reserved device names
 NUL
+creds.json

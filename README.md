@@ -27,7 +27,11 @@ bun install
 bun run build
 
 # 4. Start the server
+# Mac/Linux/Git Bash:
 bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_API_KEY", "region":"us"}'
+
+# Windows PowerShell:
+bun run server -- -- --connector squaredup-api --credentials --% "{\"apiKey\":\"YOUR_API_KEY\",\"region\":\"us\"}"
 ```
 
 Server runs at `http://localhost:3000/mcp`
@@ -89,8 +93,16 @@ bun run dev -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_KEY",
 **Windows (PowerShell):**
 
 ```powershell
-# Use backtick escaping for JSON in PowerShell
-bun run server -- -- --connector squaredup-api --credentials '{`"apiKey`":`"YOUR_KEY`",`"region`":`"us`"}'
+# Production server - Use --% to stop PowerShell parsing
+bun run server -- -- --connector squaredup-api --credentials --% "{\"apiKey\":\"YOUR_KEY\",\"region\":\"us\"}"
+
+# Dev/staging environment
+bun run dev -- -- --connector squaredup-api --credentials --% "{\"apiKey\":\"YOUR_KEY\",\"region\":\"us\",\"baseUrl\":\"https://dev.api.squaredup.com/api\"}"
+
+# Alternative: Use a credentials file (recommended for complex configs)
+# Create dev-creds.json with: {"apiKey":"YOUR_KEY","region":"us","baseUrl":"https://dev.api.squaredup.com/api"}
+$creds = Get-Content dev-creds.json -Raw
+bun run dev -- -- --connector squaredup-api --credentials $creds
 ```
 
 ## Codebase Structure
@@ -139,8 +151,11 @@ bun test
 # Build all packages
 bun run build
 
-# Development mode with auto-reload
+# Development mode with auto-reload (Mac/Linux/Git Bash)
 bun run dev -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_KEY", "region":"us"}'
+
+# Development mode with auto-reload (Windows PowerShell)
+bun run dev -- -- --connector squaredup-api --credentials --% "{\"apiKey\":\"YOUR_KEY\",\"region\":\"us\"}"
 ```
 
 ## License
