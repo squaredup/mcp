@@ -31,7 +31,7 @@ bun run build
 bun run server -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_API_KEY", "region":"us"}'
 
 # Windows PowerShell:
-bun run server -- -- --connector squaredup-api --credentials --% "{\"apiKey\":\"YOUR_API_KEY\",\"region\":\"us\"}"
+bun run server -- -- --connector squaredup-api --credentials dev-creds.json
 ```
 
 Server runs at `http://localhost:3000/mcp`
@@ -93,16 +93,11 @@ bun run dev -- -- --connector squaredup-api --credentials '{"apiKey":"YOUR_KEY",
 **Windows (PowerShell):**
 
 ```powershell
-# Production server - Use --% to stop PowerShell parsing
-bun run server -- -- --connector squaredup-api --credentials --% "{\"apiKey\":\"YOUR_KEY\",\"region\":\"us\"}"
+# Create a credentials file (e.g., dev-creds.json):
+# {"apiKey":"YOUR_KEY","region":"us","baseUrl":"https://dev.api.squaredup.com/api"}
 
-# Dev/staging environment
-bun run dev -- -- --connector squaredup-api --credentials --% "{\"apiKey\":\"YOUR_KEY\",\"region\":\"us\",\"baseUrl\":\"https://dev.api.squaredup.com/api\"}"
-
-# Alternative: Use a credentials file (recommended for complex configs)
-# Create dev-creds.json with: {"apiKey":"YOUR_KEY","region":"us","baseUrl":"https://dev.api.squaredup.com/api"}
-$creds = Get-Content dev-creds.json -Raw
-bun run dev -- -- --connector squaredup-api --credentials $creds
+# Run with credentials file (recommended)
+bun run dev -- -- --connector squaredup-api --credentials dev-creds.json
 ```
 
 ## Codebase Structure
