@@ -15,6 +15,7 @@ coverage/
 .env
 .env.local
 .env.*.local
+dev-creds.json
 
 # IDE files
 .vscode/

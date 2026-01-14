@@ -194,17 +194,33 @@ export const startServer = async (): Promise<{
         process.exit(1);
     }
 
-    // Parse credentials
+    // Parse credentials (supports JSON string or file path)
     let credentials: Record<string, unknown> = {};
     if (values.credentials) {
         try {
             credentials = JSON.parse(values.credentials);
-        } catch (error) {
-            console.error(
-                '❌ Invalid credentials JSON:',
-                error instanceof Error ? error.message : String(error),
-            );
-            process.exit(1);
+        } catch {
+            // If JSON parsing fails, try to read as file path
+            const credentialPath = path.resolve(values.credentials);
+            if (fs.existsSync(credentialPath)) {
+                try {
+                    const fileContent = fs.readFileSync(credentialPath, 'utf-8');
+                    credentials = JSON.parse(fileContent);
+                    console.log(`📁 Loaded credentials from: ${credentialPath}`);
+                } catch (fileError) {
+                    console.error(
+                        '❌ Failed to parse credentials file:',
+                        fileError instanceof Error ? fileError.message : String(fileError),
+                    );
+                    process.exit(1);
+                }
+            } else {
+                console.error(
+                    '❌ Invalid credentials: not valid JSON and file not found at:',
+                    credentialPath,
+                );
+                process.exit(1);
+            }
         }
     }
 
