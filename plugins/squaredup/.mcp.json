@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "squaredup": {
+            "type": "http",
+            "url": "${SQUAREDUP_MCP_URL:-https://mcp.squaredup.com/mcp}"
+        }
+    }
+}

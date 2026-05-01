@@ -1,0 +1,8 @@
+{
+    "name": "squaredup",
+    "version": "1.0.0",
+    "description": "SquaredUp Claude plugin",
+    "author": {
+        "name": "SquaredUp"
+    }
+}

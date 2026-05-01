@@ -1,0 +1,14 @@
+{
+    "name": "squaredup-official",
+    "description": "SquaredUp's official Claude plugin marketplace",
+    "owner": {
+        "name": "SquaredUp"
+    },
+    "plugins": [
+        {
+            "name": "squaredup",
+            "description": "SquaredUp MCP — query SquaredUp with Claude",
+            "source": "./plugins/squaredup"
+        }
+    ]
+}
