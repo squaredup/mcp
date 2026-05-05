@@ -1,6 +1,6 @@
-# SquaredUp Claude Plugin Marketplace
+# SquaredUp Claude Plugin
 
-The official Claude Code plugin marketplace for [SquaredUp](https://squaredup.com). Install the plugin and Claude can query your SquaredUp organization — dashboards, the knowledge graph, data streams, and more — through SquaredUp's hosted MCP server.
+The official Claude Code plugin for [SquaredUp](https://squaredup.com). Install the plugin and Claude can query your SquaredUp organization — dashboards, the knowledge graph, data streams, and more — through SquaredUp's hosted MCP server.
 
 ## Installation
 

@@ -1,8 +1,8 @@
 {
     "name": "squaredup",
-    "version": "1.0.0",
-    "description": "SquaredUp Claude plugin",
+    "description": "Access and manage your data in SquaredUp with Claude",
     "author": {
-        "name": "SquaredUp"
+        "name": "SquaredUp",
+        "email": "support@squaredup.com"
     }
 }

@@ -1,14 +1,22 @@
 {
     "name": "squaredup-official",
+    "displayName": "SquaredUp",
     "description": "SquaredUp's official Claude plugin marketplace",
     "owner": {
-        "name": "SquaredUp"
+        "name": "SquaredUp",
+        "email": "support@squaredup.com"
     },
     "plugins": [
         {
             "name": "squaredup",
-            "description": "SquaredUp MCP — query SquaredUp with Claude",
-            "source": "./plugins/squaredup"
+            "description": "Access and manage your data in SquaredUp with Claude",
+            "author": {
+                "name": "SquaredUp",
+                "email": "support@squaredup.com"
+            },
+            "category": "monitoring",
+            "source": "./plugins/squaredup",
+            "homepage": "https://docs.squaredup.com"
         }
     ]
 }
