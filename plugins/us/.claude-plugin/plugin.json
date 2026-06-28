@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+    "name": "us",
+    "displayName": "SquaredUp US",
+    "version": "1.0.0",
+    "description": "Connect Claude to your SquaredUp organization in the US region.",
+    "author": {
+        "name": "SquaredUp",
+        "email": "support@squaredup.com"
+    },
+    "homepage": "https://docs.squaredup.com",
+    "repository": "https://github.com/squaredup/mcp",
+    "license": "MIT",
+    "keywords": ["observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi"],
+    "dependencies": ["skills"]
+}

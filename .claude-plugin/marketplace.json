@@ -1,0 +1,57 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+    "name": "squaredup",
+    "description": "SquaredUp's official Claude Code marketplace - query and manage your dashboards, knowledge graph, data streams, and KPIs from Claude.",
+    "owner": {
+        "name": "SquaredUp",
+        "email": "support@squaredup.com"
+    },
+    "plugins": [
+        {
+            "name": "us",
+            "source": "./plugins/us",
+            "displayName": "SquaredUp US",
+            "description": "Connect Claude to your SquaredUp organization in the US region. Automatically installs SquaredUp skills.",
+            "category": "monitoring",
+            "keywords": ["observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi"],
+            "author": {
+                "name": "SquaredUp",
+                "email": "support@squaredup.com"
+            },
+            "homepage": "https://docs.squaredup.com",
+            "repository": "https://github.com/squaredup/mcp",
+            "license": "MIT"
+        },
+        {
+            "name": "eu",
+            "source": "./plugins/eu",
+            "displayName": "SquaredUp EU",
+            "description": "Connect Claude to your SquaredUp organization in the EU region. Automatically installs SquaredUp skills.",
+            "category": "monitoring",
+            "keywords": ["observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi"],
+            "author": {
+                "name": "SquaredUp",
+                "email": "support@squaredup.com"
+            },
+            "homepage": "https://docs.squaredup.com",
+            "repository": "https://github.com/squaredup/mcp",
+            "license": "MIT"
+        },
+        {
+            "name": "skills",
+            "source": "./plugins/skills",
+            "displayName": "SquaredUp Skills",
+            "description": "SquaredUp skills for workspaces, dashboards, KPIs, data and graph queries, integrations, and more.",
+            "category": "monitoring",
+            "keywords": ["observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi"],
+            "author": {
+                "name": "SquaredUp",
+                "email": "support@squaredup.com"
+            },
+            "homepage": "https://docs.squaredup.com",
+            "repository": "https://github.com/squaredup/mcp",
+            "license": "MIT",
+            "skills": ["./skills"]
+        }
+    ]
+}

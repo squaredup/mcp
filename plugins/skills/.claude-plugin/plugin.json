@@ -1,0 +1,15 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+    "name": "skills",
+    "displayName": "SquaredUp Skills",
+    "version": "1.0.0",
+    "description": "SquaredUp skills for workspaces, dashboards, KPIs, data and graph queries, integrations, and more.",
+    "author": {
+        "name": "SquaredUp",
+        "email": "support@squaredup.com"
+    },
+    "homepage": "https://docs.squaredup.com",
+    "repository": "https://github.com/squaredup/mcp",
+    "license": "MIT",
+    "keywords": ["observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi"]
+}

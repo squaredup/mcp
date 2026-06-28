@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "squaredup-eu": {
+            "type": "http",
+            "url": "https://eu.mcp.squaredup.com/mcp"
+        }
+    }
+}
