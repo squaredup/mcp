@@ -1,13 +1,13 @@
 ---
 name: query-graph
-description: Use when you need to traverse the SquaredUp entity graph with Gremlin or SQL - finding entities by type/source/property, walking relationships ("what is connected to X"), or discovering which entities to scope a data stream query to.
+description: Use when you need to traverse the SquaredUp entity graph with Gremlin - finding entities by type/source/property, walking relationships ("what is connected to X"), or discovering which entities to scope a data stream query to.
 ---
 
 > **Region:** If more than one `squaredup-*` server is connected, ask the user which one they mean before running any tools, then use that same server for every SquaredUp tool call in the task.
 
 # Querying the SquaredUp entity graph
 
-The `graph_query` tool accepts Gremlin or SQL against the tenant's entity graph. Tenant scoping is automatic - never include tenant filters in the query.
+The `graph_query` tool accepts Gremlin against the tenant's entity graph. Tenant scoping is automatic - never include tenant filters in the query.
 
 ## Schema essentials
 
@@ -47,19 +47,13 @@ g.V().hasId('space-4cp3PAvZbuEoJr0V3iX7').both().dedup().limit(100)
 
 Use `.hasId(...)` for vertex IDs, not `.has('id', ...)` - `id` is the Gremlin built-in identifier, not a regular property.
 
-**SQL alternative (for tabular thinking):**
-
-```sql
-SELECT * FROM nodes WHERE label = 'host' LIMIT 10
-```
-
 ## Always limit
 
-Tenants can have hundreds of thousands of nodes. Always finish with `.limit(N)` (Gremlin) or `LIMIT N` (SQL). Start with 10-50 while exploring; only widen if the user explicitly asks for "all".
+Tenants can have hundreds of thousands of nodes. Always finish with `.limit(N)`. Start with 10-50 while exploring; only widen if the user explicitly asks for "all".
 
 ## Bindings
 
-For values that come from user input (names, IDs, types), use parameter bindings rather than string-concatenating into the query - same hygiene as SQL parameterization:
+For values that come from user input (names, IDs, types), use parameter bindings rather than string-concatenating into the query:
 
 ```js
 {
@@ -81,4 +75,4 @@ For values that come from user input (names, IDs, types), use parameter bindings
 - Forgetting `.limit(N)` - runs against the whole tenant graph; on a real tenant that can mean tens of thousands of rows back through the LLM context.
 - `sourceType` case mismatch - values are case-sensitive (`AWS::EC2::Instance` is not `aws::ec2::instance`). When in doubt, fetch one example vertex first and read the exact value.
 - Adding a tenant filter - tenant scoping is automatic. An explicit tenant clause is wrong, not redundant: it will narrow against an internal field you don't control and return nothing.
-- String-concatenating user input into the query - use `bindings` (see above). Same hygiene as parameterised SQL.
+- String-concatenating user input into the query - use `bindings` (see above).
