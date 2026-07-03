@@ -1,0 +1,8 @@
+[
+    {
+        "name": "squaredup-health",
+        "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/poll-health.mjs\" --region us",
+        "description": "SquaredUp US workspace health changes — wakes Claude to auto-investigate (RCA) when a workspace goes unhealthy. Off until SQUAREDUP_API_KEY is set (or SQUAREDUP_HEALTH_MODE=demo).",
+        "when": "always"
+    }
+]

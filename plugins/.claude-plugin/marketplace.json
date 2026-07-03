@@ -1,0 +1,27 @@
+{
+    "name": "squaredup-local",
+    "owner": {
+        "name": "SquaredUp",
+        "email": "support@squaredup.com"
+    },
+    "metadata": {
+        "description": "Local dev marketplace for testing the SquaredUp plugins (incl. the health monitor prototype)."
+    },
+    "plugins": [
+        {
+            "name": "skills",
+            "source": "./skills",
+            "description": "SquaredUp skills (workspaces, dashboards, KPIs, queries, health-rca, ...)."
+        },
+        {
+            "name": "eu",
+            "source": "./eu",
+            "description": "Connect to SquaredUp EU + the squaredup-health background monitor."
+        },
+        {
+            "name": "us",
+            "source": "./us",
+            "description": "Connect to SquaredUp US."
+        }
+    ]
+}

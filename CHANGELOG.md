@@ -2,6 +2,13 @@
 
 All notable changes to the SquaredUp marketplace and its plugins are documented here. The marketplace follows [Semantic Versioning](https://semver.org) per plugin; each plugin's `version` lives in its `.claude-plugin/plugin.json` and must be bumped on every release.
 
+## [1.1.0] - 2026-07-01
+
+### Added
+
+- **Health watcher (auto-RCA)** - an opt-in background monitor bundled with the `eu` and `us` plugins. It polls SquaredUp workspace health and, the moment a workspace turns unhealthy, wakes Claude to walk the entity graph and report a likely root cause and blast radius before anyone asks. **Off by default** - enable with the `SQUAREDUP_API_KEY` environment variable.
+- **`health-rca` skill** (in `skills@squaredup`) - drives the investigation triggered by a health-watcher notification: reads the failing monitor's state reason, resolves the tile's monitored scope, walks the graph upstream, and reports cause + blast radius. Brings the shared skill count to 15.
+
 ## [1.0.1] - 2026-07-01
 
 ### Fixed

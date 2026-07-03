@@ -5,7 +5,8 @@ The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Insta
 ## What you get
 
 - **One MCP server for your region** - browser OAuth, nothing to configure, no API keys to manage.
-- **Fourteen skills**, that guide your agent through real SquaredUp workflows: exploring a tenant, reading dashboards, querying data streams and the entity graph, working with KPIs, cloning workspaces, managing integrations, alerting and notification channels, permissions and sharing, scheduled reports, and managing users.
+- **Fifteen skills**, that guide your agent through real SquaredUp workflows: exploring a tenant, reading dashboards, querying data streams and the entity graph, working with KPIs, cloning workspaces, managing integrations, alerting and notification channels, permissions and sharing, scheduled reports, managing users, and auto-investigating (RCA) a workspace that turns unhealthy.
+- **An optional background health watcher** that wakes your agent to root-cause an incident the moment a workspace goes red — see [Health watcher (auto-RCA)](#health-watcher-auto-rca--experimental-opt-in).
 
 ## Install for Claude
 
@@ -52,6 +53,41 @@ Install **both** region plugins:
 ```
 
 Both servers will be present (and the shared skills are installed just once). When a task is ambiguous, Claude will ask which region you mean before running any tools, then stick to that region's server for the rest of the task.
+
+## Health watcher (auto-RCA) — experimental, opt-in
+
+The region plugins ship a background **health watcher**. When enabled, it polls your workspaces' rolled-up health and, the moment a workspace goes unhealthy, wakes Claude to investigate _before you ask_ — Claude walks the entity graph from the failing monitor, pulls the relevant data streams around the failure time, and reports a likely root cause and blast radius (driven by the bundled `health-rca` skill). "Checkout is red" becomes "Checkout is red because its RDS instance hit connection limits at 14:01, and order-service is downstream."
+
+**It is off by default and never fires on a fresh install.** Nothing happens until you opt in with environment variables.
+
+### Requirements
+
+- Claude Code **v2.1.105 or later** (plugin monitors are an experimental feature).
+- An **interactive CLI session** — monitors don't run in the desktop/web apps or IDE extensions.
+- **Node.js 18+** on your PATH (the watcher is a tiny zero-dependency Node script).
+
+### Enabling it
+
+The watcher authenticates with a **SquaredUp API key**. This is the one place the integration needs a key: the MCP server itself uses browser OAuth, but a background process can't do an interactive sign-in, and the API has no machine-to-machine grant. Create a key in SquaredUp under **Settings → API Keys** (your tenant tier must include API access).
+
+Set these environment variables in the shell (or profile) you launch Claude Code from, then start a session:
+
+```bash
+export SQUAREDUP_API_KEY="<your SquaredUp API key>"   # required; read from the environment, never stored in config
+export SQUAREDUP_HEALTH_MODE="live"                    # optional; "live" forces live polling. Default "auto" = live when a key is set.
+export SQUAREDUP_POLL_SECONDS="60"                     # optional; how often to poll (default 60, minimum 15)
+export SQUAREDUP_WORKSPACE_IDS="space-prod,space-eu"   # optional; restrict to specific workspaces (default: all you can see)
+```
+
+The region is taken from the plugin you installed (`eu` / `us`), so you don't set it. Each session establishes a silent baseline on the first poll and only wakes Claude on an actual state change. To turn it off again, set `SQUAREDUP_HEALTH_MODE=off` (or just unset `SQUAREDUP_API_KEY`).
+
+### See it without a tenant
+
+```bash
+export SQUAREDUP_HEALTH_MODE="demo"
+```
+
+Demo mode scripts a single incident (~8s in) and recovery (~70s in) with no API key, so you can watch the full wake → auto-RCA chain end to end. It's the quickest way to show off the feature.
 
 ## Manual MCP configuration (no plugin)
 
@@ -110,9 +146,11 @@ Region plugins are version-pinned, so you receive updates when we publish a new 
 ```
 .claude-plugin/marketplace.json   # marketplace "squaredup" -> us, eu, skills
 plugins/
-  skills/   skills/<name>/SKILL.md # the 14 shared skills, defined once (no MCP)
+  skills/   skills/<name>/SKILL.md # the 15 shared skills, defined once (no MCP)
   us/       .mcp.json              # squaredup-us -> mcp.squaredup.com  (depends on skills)
+            monitors/ scripts/     # optional background health watcher (--region us)
   eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com (depends on skills)
+            monitors/ scripts/     # optional background health watcher (--region eu)
 ```
 
 `us` and `eu` declare `"dependencies": ["skills"]`, so the skills live in exactly one place and are shared rather than duplicated.
