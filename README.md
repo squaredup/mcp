@@ -1,11 +1,33 @@
 # SquaredUp MCP
 
-The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Install a region plugin and your agent of choice can query and manage your SquaredUp organization - **dashboards**, the **knowledge graph**, **data streams**, **KPIs**, **workspaces**, and **integrations** - through SquaredUp's hosted MCP server, with a set of bundled skills that teach any agent how to use it well.
+The official [SquaredUp](https://squaredup.com) marketplace for AI agents. It contains everything an agent needs to work with SquaredUp:
 
-## What you get
+- **Use SquaredUp** - query and manage your organization's **dashboards**, **knowledge graph**, **data streams**, **KPIs**, **workspaces**, and **integrations** through SquaredUp's hosted MCP server, with bundled skills that teach any agent how to use it well.
+- **Extend SquaredUp** - build a new SquaredUp plugin (a low-code integration with any HTTP/REST API) end to end, guided by the `build-plugin` skill.
 
-- **One MCP server for your region** - browser OAuth, nothing to configure, no API keys to manage.
-- **Fourteen skills**, that guide your agent through real SquaredUp workflows: exploring a tenant, reading dashboards, querying data streams and the entity graph, working with KPIs, cloning workspaces, managing integrations, alerting and notification channels, permissions and sharing, scheduled reports, and managing users.
+> **The MCP server is only for the first of those.** You need it to have an agent read and manage a live SquaredUp organization - dashboards, the graph, data streams, KPIs, and so on. **Building a SquaredUp plugin doesn't use MCP at all**: `squaredup-plugins@squaredup` bundles no server and works entirely through the [`@squaredup/cli`](https://www.npmjs.com/package/@squaredup/cli). Install it on its own, with no region plugin and nothing to authenticate under `/mcp`.
+
+> **A note on the word "plugin".** This repo uses it in two senses. A **Claude Code plugin** is what you install with `/plugin install` (`us`, `eu`, `skills`, `squaredup-plugins`). A **SquaredUp plugin** is a data source integration that pulls data into SquaredUp - that's what the `squaredup-plugins` Claude Code plugin helps you build.
+
+## What's in the marketplace
+
+| Plugin                 | What it gives you                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `us@squaredup`         | MCP server for the US region + the shared skills (via dependency)                        |
+| `eu@squaredup`         | MCP server for the EU region + the shared skills (via dependency)                        |
+| `skills@squaredup`     | The 14 shared skills, defined once, no MCP server. Installed automatically by `us`/`eu`. |
+| `squaredup-plugins@squaredup` | The `build-plugin` and `deploy-plugin` skills for authoring SquaredUp integrations. Standalone - no MCP server. |
+
+### The 14 shared skills
+
+They guide your agent through real SquaredUp workflows: `explore-org`, `dashboards`, `query-data`, `query-graph`, `kpis`, `workspaces`, `clone-workspace`, `integrations`, `alerting`, `notifications`, `permissions`, `sharing`, `scheduled-reports`, `users`.
+
+### The plugin-building skills
+
+- **`build-plugin`** walks you through creating a SquaredUp low-code plugin for an HTTP/REST API - exploring the API, planning the object model and data streams, scaffolding files, then deploying early and testing every data stream against a live authenticated plugin in your own tenant before it ships.
+- **`deploy-plugin`** validates a plugin, works out the correct version bump, and deploys it to a tenant. `build-plugin` invokes it at each deploy checkpoint; you can also use it on its own against an existing plugin.
+
+Both require the [`@squaredup/cli`](https://www.npmjs.com/package/@squaredup/cli) (`npm i -g @squaredup/cli`) and a tenant you can authenticate against.
 
 ## Install for Claude
 
@@ -17,9 +39,9 @@ Run this once in any Claude Code session:
 /plugin marketplace add squaredup/mcp
 ```
 
-### 2. Install your region
+### 2. Install what you need
 
-Pick the plugin for the region your SquaredUp organization is hosted in:
+**To use SquaredUp** - pick the plugin for the region your organization is hosted in:
 
 ```
 /plugin install us@squaredup     # US
@@ -38,9 +60,19 @@ The region plugin **automatically pulls in the shared `skills@squaredup` plugin*
 
 Not sure which region you're on? Check the URL you use to sign in to SquaredUp - EU tenants use an `eu.` host.
 
+**To build a SquaredUp plugin:**
+
+```
+/plugin install squaredup-plugins@squaredup
+```
+
+This one is independent of the region plugins - it bundles no MCP server and works through the `squaredup` CLI instead. Install it alongside a region plugin, or on its own.
+
 ### 3. Authenticate
 
 Run `/mcp`, select your region's server, and sign in. Authentication is browser-based using your existing SquaredUp account - there are no tokens to copy. The first tool call will prompt you if you haven't signed in yet.
+
+(`squaredup-plugins` needs no `/mcp` step - run `squaredup login` in your terminal instead.)
 
 ### Organizations that span both regions
 
@@ -92,10 +124,11 @@ The skills are published to the [Agent Skills](https://agentskills.io) open stan
 ```bash
 npx skills add squaredup/mcp            # install all skills
 npx skills add squaredup/mcp --list     # list available skills
-npx skills add squaredup/mcp --skill explore-org   # install one skill
+npx skills add squaredup/mcp --skill explore-org    # install one skill
+npx skills add squaredup/mcp --skill build-plugin   # just the plugin builder
 ```
 
-The CLI discovers the skills through the `skills` field of the `skills` plugin entry in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The skills assume a connected SquaredUp MCP server (configure one as above).
+The CLI discovers the skills through the `skills` field of each plugin entry in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The SquaredUp workflow skills assume a connected SquaredUp MCP server (configure one as above); `build-plugin` and `deploy-plugin` need no MCP server, only the `squaredup` CLI.
 
 ## Updating
 
@@ -103,16 +136,22 @@ The CLI discovers the skills through the `skills` field of the `skills` plugin e
 /plugin marketplace update squaredup
 ```
 
-Region plugins are version-pinned, so you receive updates when we publish a new version.
+Plugins are version-pinned, so you receive updates when we publish a new version.
 
 ## Repository layout
 
 ```
-.claude-plugin/marketplace.json   # marketplace "squaredup" -> us, eu, skills
+.claude-plugin/marketplace.json          # marketplace "squaredup" -> us, eu, skills, squaredup-plugins
 plugins/
-  skills/   skills/<name>/SKILL.md # the 14 shared skills, defined once (no MCP)
-  us/       .mcp.json              # squaredup-us -> mcp.squaredup.com  (depends on skills)
-  eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com (depends on skills)
+  skills/            skills/<name>/SKILL.md   # the 14 shared skills, defined once (no MCP)
+  us/                .mcp.json                # squaredup-us -> mcp.squaredup.com    (depends on skills)
+  eu/                .mcp.json                # squaredup-eu -> eu.mcp.squaredup.com (depends on skills)
+  squaredup-plugins/ skills/build-plugin/     # SKILL.md + references/ + scripts/ (no MCP)
+                     skills/deploy-plugin/    # SKILL.md
 ```
 
-`us` and `eu` declare `"dependencies": ["skills"]`, so the skills live in exactly one place and are shared rather than duplicated.
+`us` and `eu` declare `"dependencies": ["skills"]`, so the skills live in exactly one place and are shared rather than duplicated. `squaredup-plugins` has no dependencies - it is a self-contained pair of authoring skills.
+
+## Contributing
+
+Every change to a plugin must bump that plugin's `version` in its `.claude-plugin/plugin.json` and add an entry to [`CHANGELOG.md`](CHANGELOG.md).
