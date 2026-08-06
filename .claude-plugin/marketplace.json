@@ -52,6 +52,22 @@
             "repository": "https://github.com/squaredup/mcp",
             "license": "MIT",
             "skills": ["./skills"]
+        },
+        {
+            "name": "squaredup-plugins",
+            "source": "./plugins/squaredup-plugins",
+            "displayName": "SquaredUp Plugin Building",
+            "description": "Build SquaredUp plugins using Claude",
+            "category": "monitoring",
+            "keywords": ["squaredup", "plugin", "webapi", "development", "integration", "dashboard"],
+            "author": {
+                "name": "SquaredUp",
+                "email": "support@squaredup.com"
+            },
+            "homepage": "https://docs.squaredup.com",
+            "repository": "https://github.com/squaredup/mcp",
+            "license": "MIT",
+            "skills": ["./plugins/squaredup-plugins/skills"]
         }
     ]
 }

@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+    "name": "squaredup-plugins",
+    "displayName": "SquaredUp Plugin Building",
+    "version": "1.0.0",
+    "description": "Build SquaredUp plugins using Claude",
+    "author": {
+        "name": "SquaredUp",
+        "email": "support@squaredup.com"
+    },
+    "homepage": "https://docs.squaredup.com",
+    "repository": "https://github.com/squaredup/plugins",
+    "license": "MIT",
+    "keywords": ["squaredup", "plugin", "webapi", "development", "integration", "dashboard"],
+    "dependencies": []
+}
