@@ -16,11 +16,6 @@
             "name": "eu",
             "source": "./plugins/eu",
             "category": "monitoring"
-        },
-        {
-            "name": "skills",
-            "source": "./plugins/skills",
-            "category": "monitoring"
         }
     ]
 }

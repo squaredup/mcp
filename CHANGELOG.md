@@ -2,6 +2,16 @@
 
 All notable changes to the SquaredUp marketplace and its plugins are documented here. The marketplace follows [Semantic Versioning](https://semver.org) per plugin; each plugin's `version` lives in its `.claude-plugin/plugin.json` and must be bumped on every release.
 
+## [1.1.0] - 2026-10-12
+
+### Removed
+
+- **`skills@squaredup`** - the plugin and its 14 skills are gone. The SquaredUp MCP server now provides the same guidance through its `get_skill` tool, so the skills no longer need a separate install. If you installed it before, remove it with `/plugin uninstall skills@squaredup`.
+
+### Changed
+
+- **`us@squaredup`** and **`eu@squaredup`** (`1.1.0`) - no longer depend on `skills`.
+
 ## [1.0.2] - 2026-10-12
 
 ### Added

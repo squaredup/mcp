@@ -1,11 +1,11 @@
 # SquaredUp MCP
 
-The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Install a region plugin and your agent of choice can query and manage your SquaredUp organization - **dashboards**, the **knowledge graph**, **data streams**, **KPIs**, **workspaces**, and **integrations** - through SquaredUp's hosted MCP server, with a set of bundled skills that teach any agent how to use it well.
+The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Install a region plugin and your agent of choice can query and manage your SquaredUp organization - **dashboards**, the **knowledge graph**, **data streams**, **KPIs**, **workspaces**, and **integrations** - through SquaredUp's hosted MCP server.
 
 ## What you get
 
 - **One MCP server for your region** - browser OAuth, nothing to configure, no API keys to manage.
-- **Fourteen skills**, that guide your agent through real SquaredUp workflows: exploring a tenant, reading dashboards, querying data streams and the entity graph, working with KPIs, cloning workspaces, managing integrations, alerting and notification channels, permissions and sharing, scheduled reports, and managing users.
+- **Built-in skills** - the server's `get_skill` tool guides your agent through real SquaredUp workflows: exploring a tenant, reading dashboards, querying data streams and the entity graph, working with KPIs, cloning workspaces, managing integrations, alerting and notification channels, permissions and sharing, scheduled reports, and managing users. There is nothing extra to install.
 
 ## Install for Claude
 
@@ -29,7 +29,7 @@ Pick the plugin for the region your SquaredUp organization is hosted in:
 /plugin install eu@squaredup     # EU
 ```
 
-The region plugin **automatically pulls in the shared `skills@squaredup` plugin** as a dependency - one command installs everything. It installs **only your region's MCP server**; the other region is never added.
+The region plugin installs **only your region's MCP server**; the other region is never added.
 
 | Region | Plugin         | Server         | Endpoint                           |
 | ------ | -------------- | -------------- | ---------------------------------- |
@@ -51,7 +51,7 @@ Install **both** region plugins:
 /plugin install eu@squaredup
 ```
 
-Both servers will be present (and the shared skills are installed just once). When a task is ambiguous, Claude will ask which region you mean before running any tools, then stick to that region's server for the rest of the task.
+Both servers will be present. When a task is ambiguous, Claude will ask which region you mean before running any tools, then stick to that region's server for the rest of the task.
 
 ## Manual MCP configuration (no plugin)
 
@@ -83,19 +83,7 @@ If you'd rather wire the MCP server up directly, add the entry for your region t
 }
 ```
 
-The OAuth flow is identical - the first tool call prompts you to sign in. Note that without the plugin you don't get the bundled skills.
-
-## Other agents (Cursor, Codex, ...)
-
-The skills are published to the [Agent Skills](https://agentskills.io) open standard and can be installed into any compatible agent with the [`skills` CLI](https://skills.sh):
-
-```bash
-npx skills add squaredup/mcp            # install all skills
-npx skills add squaredup/mcp --list     # list available skills
-npx skills add squaredup/mcp --skill explore-org   # install one skill
-```
-
-The CLI discovers the skills in the `skills/` directory of the `skills` plugin listed in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The skills assume a connected SquaredUp MCP server (configure one as above).
+The OAuth flow is identical - the first tool call prompts you to sign in. Skills come from the server itself, so you get them with or without the plugin.
 
 ## Updating
 
@@ -108,11 +96,8 @@ Region plugins are version-pinned, so you receive updates when we publish a new 
 ## Repository layout
 
 ```
-.claude-plugin/marketplace.json   # marketplace "squaredup" -> us, eu, skills
+.claude-plugin/marketplace.json   # marketplace "squaredup" -> us, eu
 plugins/
-  skills/   skills/<name>/SKILL.md # the 14 shared skills, defined once (no MCP)
-  us/       .mcp.json              # squaredup-us -> mcp.squaredup.com  (depends on skills)
-  eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com (depends on skills)
+  us/       .mcp.json              # squaredup-us -> mcp.squaredup.com
+  eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com
 ```
-
-`us` and `eu` declare `"dependencies": ["skills"]`, so the skills live in exactly one place and are shared rather than duplicated.
