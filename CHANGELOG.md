@@ -6,11 +6,11 @@ All notable changes to the SquaredUp marketplace and its plugins are documented 
 
 ### Removed
 
-- **`skills@squaredup`** - the plugin and its 14 skills are gone. The SquaredUp MCP server now provides the same guidance through its `get_skill` tool, so the skills no longer need a separate install. If you installed it before, remove it with `/plugin uninstall skills@squaredup`.
+- **`skills@squaredup`** - the plugin and its 14 skills are gone. The SquaredUp MCP server now provides the same guidance through its `get_skill` tool, so the skills no longer need a separate install. The marketplace maps `skills` to `null` in `renames`, so existing installs stop loading it after the next marketplace update, with no action needed.
 
 ### Changed
 
-- **`us@squaredup`** and **`eu@squaredup`** (`1.1.0`) - no longer depend on `skills`.
+- **`us@squaredup`** and **`eu@squaredup`** (`1.1.0`) - no longer depend on `skills`. Without auto-update, run `claude plugin update us@squaredup` (or `eu@squaredup`) to get this version, because 1.0.x is disabled once `skills` is gone.
 
 ## [1.0.2] - 2026-10-12
 

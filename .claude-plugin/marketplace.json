@@ -17,5 +17,8 @@
             "source": "./plugins/eu",
             "category": "monitoring"
         }
-    ]
+    ],
+    "renames": {
+        "skills": null
+    }
 }
