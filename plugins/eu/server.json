@@ -1,0 +1,18 @@
+{
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name": "com.squaredup/eu",
+    "title": "SquaredUp (EU)",
+    "description": "Query and manage SquaredUp dashboards, data streams, the knowledge graph, and KPIs (EU region).",
+    "version": "1.0.2",
+    "repository": {
+        "url": "https://github.com/squaredup/mcp",
+        "source": "github"
+    },
+    "websiteUrl": "https://docs.squaredup.com",
+    "remotes": [
+        {
+            "type": "streamable-http",
+            "url": "https://eu.mcp.squaredup.com/mcp"
+        }
+    ]
+}

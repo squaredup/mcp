@@ -23,7 +23,7 @@ A channel with no rule pointing at it is silent. A rule is what makes a monitor 
 
 | Tool                   | What it does                                                     |
 | ---------------------- | ---------------------------------------------------------------- |
-| `alerting_rule_list`   | List rules (pass `workspaceId` for one workspace, omit for all). |
+| `alerting_rule_list`   | List rules (set `workspaceId` for one workspace, omit for all). |
 | `alerting_rule_get`    | Read one rule by ID.                                             |
 | `alerting_rule_create` | Add a rule to a workspace - wire monitors to channels.           |
 | `alerting_rule_update` | Change a rule (channels, monitors, renotify) or pause/resume it. |
@@ -46,7 +46,7 @@ await alerting_rule_create({
 });
 ```
 
-That's the least-noisy setup. To alert on **every** failing tile, pass `monitors`:
+That's the least-noisy setup. To alert on **every** failing tile, set `monitors`:
 
 ```js
 await alerting_rule_create({
@@ -89,7 +89,7 @@ Tile-level config overrides dashboard-level, which overrides workspace-level.
 
 ## Acting on several rules at once
 
-To pause, resume, or delete **every** rule on a workspace (e.g. "mute all alerts for this workspace"), pass `ruleIds` rather than calling the tool once per rule:
+To pause, resume, or delete **every** rule on a workspace (e.g. "mute all alerts for this workspace"), set `ruleIds` rather than calling the tool once per rule:
 
 ```js
 const rules = await alerting_rule_list({ workspaceId: 'space-abc123' });

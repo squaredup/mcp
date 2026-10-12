@@ -2,6 +2,19 @@
 
 All notable changes to the SquaredUp marketplace and its plugins are documented here. The marketplace follows [Semantic Versioning](https://semver.org) per plugin; each plugin's `version` lives in its `.claude-plugin/plugin.json` and must be bumped on every release.
 
+## [1.0.2] - 2026-10-12
+
+### Added
+
+- **MCP Registry publishing** - `us` and `eu` each ship a `server.json` (`com.squaredup/us`, `com.squaredup/eu`), and the `Release` workflow publishes both to the [MCP Registry](https://registry.modelcontextprotocol.io) when a `v*` tag is pushed. It is off until the `REGISTRY_PUBLISH_ENABLED` repository variable is `true`.
+- **Directory listing metadata** - every plugin now declares an icon and documentation, support, privacy policy, and terms of service URLs for Anthropic's plugin directory.
+
+### Changed
+
+- **`us@squaredup`** and **`eu@squaredup`** (`1.0.2`) - display as "SquaredUp (US)" and "SquaredUp (EU)".
+- **`skills@squaredup`** (`1.0.2`) - `alerting`, `dashboards`, and `query-data` say "set `x`" rather than "pass `x`" for tool parameters; no change in behaviour.
+- **Marketplace** - plugin metadata lives only in each plugin's `plugin.json`; marketplace entries carry just `name`, `source`, and `category`.
+
 ## [1.0.1] - 2026-07-01
 
 ### Fixed

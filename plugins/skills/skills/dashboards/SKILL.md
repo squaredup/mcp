@@ -53,7 +53,7 @@ Don't fan out 20 parallel `data_stream_query` calls without thinking - `dashboar
 
 ## Pattern: "show me the data for this tile / KPI"
 
-`tile_query(dashboardId, tileId)` - reads the tile's config and fires the stream in one step. Optionally pass `timeframe` to override the tile's stored window. The `dashboardId` and `tileId` are returned by `tile_list` and `kpi_list`.
+`tile_query(dashboardId, tileId)` - reads the tile's config and fires the stream in one step. Optionally set `timeframe` to override the tile's stored window. The `dashboardId` and `tileId` are returned by `tile_list` and `kpi_list`.
 
 ## Pattern: "duplicate / build me a dashboard like X"
 

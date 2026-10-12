@@ -62,7 +62,7 @@ This mirrors the five steps a user takes in the tile editor (which always happen
 2. `data_source_list` - pick the data source(s). Check they're linked to the workspace (`workspace_get` → `links.plugins`) if unsure.
 3. Identify the stream (often by reading an existing tile via `tile_get`, which also reveals the required scope shape and any `dataSourceConfig` inputs).
 4. `scope_resolve` - get the entity node IDs the user cares about, matching the stream's required entity types.
-5. `data_stream_query` - pass `workspaceId` + stream id/name + source(s) + scope + `dataSourceConfig` (if the stream takes inputs) + timeframe.
+5. `data_stream_query` - supply `workspaceId` + stream id/name + source(s) + scope + `dataSourceConfig` (if the stream takes inputs) + timeframe.
 
 If you don't know which stream to use, find a tile on an existing dashboard that does something similar and copy its `dataStream.id`, `scope`, `dataSourceConfig`, and source IDs - and take `workspaceId` from that dashboard (`dashboard_list` / `dashboard_get` return it). This is faster and more reliable than guessing.
 

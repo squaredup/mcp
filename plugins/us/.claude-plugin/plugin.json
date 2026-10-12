@@ -1,14 +1,19 @@
 {
     "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
     "name": "us",
-    "displayName": "SquaredUp US",
-    "version": "1.0.0",
-    "description": "Connect Claude to your SquaredUp organization in the US region.",
+    "displayName": "SquaredUp (US)",
+    "version": "1.0.2",
+    "description": "Connect Claude to your SquaredUp organization in the US region. Automatically installs SquaredUp skills.",
     "author": {
         "name": "SquaredUp",
         "email": "support@squaredup.com"
     },
     "homepage": "https://docs.squaredup.com",
+    "icon": "./.claude-plugin/icon.png",
+    "documentationUrl": "https://docs.squaredup.com/ai-features/squaredup-mcp",
+    "supportUrl": "https://docs.squaredup.com/submit-ticket",
+    "privacyPolicyUrl": "https://squaredup.com/privacy-policy/",
+    "termsOfServiceUrl": "https://squaredup.com/terms-and-conditions/",
     "repository": "https://github.com/squaredup/mcp",
     "license": "MIT",
     "keywords": ["observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi"],

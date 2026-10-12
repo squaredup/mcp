@@ -95,7 +95,7 @@ npx skills add squaredup/mcp --list     # list available skills
 npx skills add squaredup/mcp --skill explore-org   # install one skill
 ```
 
-The CLI discovers the skills through the `skills` field of the `skills` plugin entry in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The skills assume a connected SquaredUp MCP server (configure one as above).
+The CLI discovers the skills in the `skills/` directory of the `skills` plugin listed in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json). The skills assume a connected SquaredUp MCP server (configure one as above).
 
 ## Updating
 

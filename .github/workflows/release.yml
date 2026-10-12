@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, without a leading v"
+        required: true
+
+jobs:
+  registry:
+    name: Publish to MCP Registry
+    runs-on: ubuntu-latest
+    if: ${{ vars.REGISTRY_PUBLISH_ENABLED == 'true' }}
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Resolve version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: echo "version=${INPUT_VERSION:-${GITHUB_REF#refs/tags/v}}" >> "$GITHUB_OUTPUT"
+
+      - name: Stamp version into server.json
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          for file in plugins/us/server.json plugins/eu/server.json; do
+            jq --arg v "$VERSION" '.version = $v' "$file" > server.tmp && mv server.tmp "$file"
+            cat "$file"
+          done
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate
+        run: ./mcp-publisher login dns --domain squaredup.com --private-key "$MCP_REGISTRY_DNS_KEY"
+        env:
+          MCP_REGISTRY_DNS_KEY: ${{ secrets.MCP_REGISTRY_DNS_KEY }}
+
+      - name: Publish US
+        run: ./mcp-publisher publish plugins/us/server.json
+
+      - name: Publish EU
+        run: ./mcp-publisher publish plugins/eu/server.json
