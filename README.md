@@ -85,6 +85,15 @@ If you'd rather wire the MCP server up directly, add the entry for your region t
 
 The OAuth flow is identical - the first tool call prompts you to sign in. Skills come from the server itself, so you get them with or without the plugin.
 
+## Installed the skills with `npx skills`?
+
+The skills used to be published from this repo for the [`skills` CLI](https://skills.sh). They now come from the SquaredUp MCP server, so remove the old copies to stop them going stale:
+
+```bash
+npx skills remove squaredup/mcp -y      # project install
+npx skills remove squaredup/mcp -g -y   # global install
+```
+
 ## Updating
 
 ```

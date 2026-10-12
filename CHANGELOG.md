@@ -6,7 +6,7 @@ All notable changes to the SquaredUp marketplace and its plugins are documented 
 
 ### Removed
 
-- **`skills@squaredup`** - the plugin and its 14 skills are gone. The SquaredUp MCP server now provides the same guidance through its `get_skill` tool, so the skills no longer need a separate install. The marketplace maps `skills` to `null` in `renames`, so existing installs stop loading it after the next marketplace update, with no action needed.
+- **`skills@squaredup`** - the plugin and its 14 skills are gone. The SquaredUp MCP server now provides the same guidance through its `get_skill` tool, so the skills no longer need a separate install. The marketplace maps `skills` to `null` in `renames`, so existing installs stop loading it after the next marketplace update, with no action needed. Skills installed with `npx skills add squaredup/mcp` are not removed automatically; run `npx skills remove squaredup/mcp -y` (add `-g` for a global install).
 
 ### Changed
 
