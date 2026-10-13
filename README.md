@@ -7,7 +7,21 @@ The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Insta
 - **One MCP server for your region** - browser OAuth, nothing to configure, no API keys to manage.
 - **Built-in skills** - the server's `get_skill` tool guides your agent through real SquaredUp workflows: exploring a tenant, reading dashboards, querying data streams and the entity graph, working with KPIs, cloning workspaces, managing integrations, alerting and notification channels, permissions and sharing, scheduled reports, and managing users. There is nothing extra to install.
 
-## Install for Claude
+## Choose your agent
+
+| Agent                                                                    | How to install                         |
+| ------------------------------------------------------------------------ | -------------------------------------- |
+| [Claude Code](#install-for-claude-code)                                  | Plugin marketplace                     |
+| [Claude desktop and claude.ai](#install-for-claude-desktop-and-claudeai) | Plugin marketplace or custom connector |
+| [Cursor](#one-click)                                                     | One-click button                       |
+| [VS Code](#one-click)                                                    | One-click button or `code --add-mcp`   |
+| [Codex](#codex)                                                          | Plugin marketplace or `codex mcp add`  |
+| [GitHub Copilot CLI](#github-copilot-cli)                                | Plugin marketplace                     |
+| [Gemini CLI](#gemini-cli)                                                | `gemini mcp add`                       |
+| [ChatGPT](#chatgpt)                                                      | Custom MCP server                      |
+| [Other MCP clients](#other-mcp-clients)                                  | Server URL                             |
+
+## Install for Claude Code
 
 ### 1. Add the marketplace
 
@@ -53,6 +67,30 @@ Install **both** region plugins:
 
 Both servers will be present. When a task is ambiguous, Claude will ask which region you mean before running any tools, then stick to that region's server for the rest of the task.
 
+## Install for Claude desktop and claude.ai
+
+These steps are the same in the Claude desktop app and on claude.ai, with no config files to edit. Either way, the server is saved to your Claude account, so you can use it in chat and Cowork.
+
+### As a plugin
+
+1. Open **Customize > Plugins**, select **Add marketplace**, and enter `squaredup/mcp`.
+2. Find the plugin for your region (`us` or `eu`) and select **Add**.
+3. Open the plugin's **Connectors** tab, add its server, and select **Connect** to sign in with your SquaredUp account.
+
+The plugin also reaches Claude Code the next time you start a session signed in to the same account, so you don't need to install it there as well. To pick up new versions, select **Check for updates** on the marketplace or turn on **Sync automatically**.
+
+### As a custom connector
+
+1. Open **Customize > Connectors** and select **Add custom connector**.
+2. Enter the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and select **Add**.
+3. Select **Connect** to sign in.
+
+The Free plan allows one custom connector.
+
+### Team and Enterprise plans
+
+Members can't add custom connectors themselves, so an Owner adds the server for the organization first. In **Organization settings > Connectors**, select **Add**, then **Custom**, choose **Web** if asked, and enter your region's server URL. Members then find it under **Customize > Connectors** with a **Custom** label and select **Connect**. The same applies to the plugin: if its **Connectors** tab shows the server as **Not added**, ask an Owner to add it.
+
 ## Manual MCP configuration (no plugin)
 
 If you'd rather wire the MCP server up directly, add the entry for your region to your Claude Code MCP config.
@@ -84,6 +122,65 @@ If you'd rather wire the MCP server up directly, add the entry for your region t
 ```
 
 The OAuth flow is identical - the first tool call prompts you to sign in. Skills come from the server itself, so you get them with or without the plugin.
+
+## Install for other agents
+
+Every option below adds only your region's MCP server. Skills come with the server, so there is nothing else to install. Sign in with your SquaredUp account in the browser when the agent first connects.
+
+### One click
+
+| Agent   | US                                                                                                                                                                                                                                                                                                                      | EU                                                                                                                                                                                                                                                                                                                         |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cursor  | [![Add US server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-us&config=eyJ1cmwiOiJodHRwczovL21jcC5zcXVhcmVkdXAuY29tL21jcCJ9)                                                                                                                            | [![Add EU server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-eu&config=eyJ1cmwiOiJodHRwczovL2V1Lm1jcC5zcXVhcmVkdXAuY29tL21jcCJ9)                                                                                                                           |
+| VS Code | [![Add US server to VS Code](https://img.shields.io/badge/VS_Code-Install_US_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-us&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.squaredup.com%2Fmcp%22%7D) | [![Add EU server to VS Code](https://img.shields.io/badge/VS_Code-Install_EU_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-eu&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Feu.mcp.squaredup.com%2Fmcp%22%7D) |
+
+VS Code also takes the server from the command line:
+
+```bash
+code --add-mcp '{"name":"squaredup-us","type":"http","url":"https://mcp.squaredup.com/mcp"}'
+```
+
+### Command line
+
+The commands below are for the US region. For EU, use `eu@squaredup`, `squaredup-eu` and `https://eu.mcp.squaredup.com/mcp` instead.
+
+#### Codex
+
+Codex reads this repo's marketplace as is:
+
+```bash
+codex plugin marketplace add squaredup/mcp
+codex plugin add us@squaredup
+```
+
+The Codex IDE extension doesn't support plugins. Add the server directly instead; the CLI and the IDE extension share the same config:
+
+```bash
+codex mcp add squaredup-us --url https://mcp.squaredup.com/mcp
+```
+
+#### GitHub Copilot CLI
+
+Copilot CLI also reads this repo's marketplace:
+
+```bash
+copilot plugin marketplace add squaredup/mcp
+copilot plugin install us@squaredup
+```
+
+#### Gemini CLI
+
+```bash
+gemini mcp add --transport http squaredup-us https://mcp.squaredup.com/mcp
+```
+
+### ChatGPT
+
+In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP server**. Paste the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and sign in when prompted. Whether you can add custom servers depends on your plan and workspace settings.
+
+### Other MCP clients
+
+Other MCP clients that support streamable HTTP and OAuth may work, but we've only tested the ones above. Point them at the server URL for your region: `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU). If yours can't sign in, [contact SquaredUp support](https://docs.squaredup.com/submit-ticket).
 
 ## Installed the skills with `npx skills`?
 
