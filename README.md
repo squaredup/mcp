@@ -180,7 +180,7 @@ In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP se
 
 ### Other MCP clients
 
-Other MCP clients that support streamable HTTP and OAuth may work, but we've only tested the ones above. Point them at the server URL for your region: `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU). If yours can't sign in, contact SquaredUp support.
+Other MCP clients that support streamable HTTP and OAuth may work, but we've only tested the ones above. Point them at the server URL for your region: `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU). If yours can't sign in, [contact SquaredUp support](https://docs.squaredup.com/submit-ticket).
 
 ## Installed the skills with `npx skills`?
 
