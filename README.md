@@ -15,13 +15,11 @@ The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Insta
 | [Claude desktop and claude.ai](#install-for-claude-desktop-and-claudeai) | Plugin marketplace or custom connector |
 | [Cursor](#one-click)                                                     | One-click button                       |
 | [VS Code](#one-click)                                                    | One-click button or `code --add-mcp`   |
-| [Kiro](#one-click)                                                       | One-click button                       |
 | [Codex](#codex)                                                          | Plugin marketplace or `codex mcp add`  |
 | [GitHub Copilot CLI](#github-copilot-cli)                                | Plugin marketplace                     |
 | [Gemini CLI](#gemini-cli)                                                | `gemini mcp add`                       |
 | [ChatGPT](#chatgpt)                                                      | Custom MCP server                      |
-| [Every agent at once](#every-agent-at-once)                              | `npx add-mcp`                          |
-| [Any other MCP client](#any-other-mcp-client)                            | Server URL                             |
+| [Other MCP clients](#other-mcp-clients)                                  | Server URL                             |
 
 ## Install for Claude Code
 
@@ -135,7 +133,6 @@ Every option below adds only your region's MCP server. Skills come with the serv
 | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cursor  | [![Add US server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-us&config=eyJ1cmwiOiJodHRwczovL21jcC5zcXVhcmVkdXAuY29tL21jcCJ9)                                                                                                                            | [![Add EU server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-eu&config=eyJ1cmwiOiJodHRwczovL2V1Lm1jcC5zcXVhcmVkdXAuY29tL21jcCJ9)                                                                                                                           |
 | VS Code | [![Add US server to VS Code](https://img.shields.io/badge/VS_Code-Install_US_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-us&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.squaredup.com%2Fmcp%22%7D) | [![Add EU server to VS Code](https://img.shields.io/badge/VS_Code-Install_EU_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-eu&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Feu.mcp.squaredup.com%2Fmcp%22%7D) |
-| Kiro    | [![Add US server to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=squaredup-us&config=%7B%22url%22%3A%22https%3A%2F%2Fmcp.squaredup.com%2Fmcp%22%7D)                                                                                                                             | [![Add EU server to Kiro](https://kiro.dev/images/add-to-kiro.svg)](https://kiro.dev/launch/mcp/add?name=squaredup-eu&config=%7B%22url%22%3A%22https%3A%2F%2Feu.mcp.squaredup.com%2Fmcp%22%7D)                                                                                                                             |
 
 VS Code also takes the server from the command line:
 
@@ -177,23 +174,13 @@ copilot plugin install us@squaredup
 gemini mcp add --transport http squaredup-us https://mcp.squaredup.com/mcp
 ```
 
-#### Every agent at once
-
-[`add-mcp`](https://github.com/neondatabase/add-mcp) writes the config for about 20 agents in one go, including Claude Code, Codex, Cursor, VS Code, Windsurf and Zed:
-
-```bash
-npx add-mcp https://mcp.squaredup.com/mcp --name squaredup-us --all -g -y
-```
-
-Leave out `--all -y` to choose the agents yourself. Skip Claude Code if you've already installed the region plugin there.
-
 ### ChatGPT
 
 In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP server**. Paste the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and sign in when prompted. Whether you can add custom servers depends on your plan and workspace settings.
 
-### Any other MCP client
+### Other MCP clients
 
-Any client that supports streamable HTTP and OAuth works. Point it at the server URL for your region: `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU).
+Other MCP clients that support streamable HTTP and OAuth may work, but we've only tested the ones above. Point them at the server URL for your region: `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU). If yours can't sign in, contact SquaredUp support.
 
 ## Installed the skills with `npx skills`?
 
