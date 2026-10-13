@@ -9,20 +9,21 @@ The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Insta
 
 ## Choose your agent
 
-| Agent                                         | How to install                        |
-| --------------------------------------------- | ------------------------------------- |
-| [Claude Code](#install-for-claude)            | Plugin marketplace                    |
-| [Cursor](#one-click)                          | One-click button                      |
-| [VS Code](#one-click)                         | One-click button or `code --add-mcp`  |
-| [Kiro](#one-click)                            | One-click button                      |
-| [Codex](#codex)                               | Plugin marketplace or `codex mcp add` |
-| [GitHub Copilot CLI](#github-copilot-cli)     | Plugin marketplace                    |
-| [Gemini CLI](#gemini-cli)                     | `gemini mcp add`                      |
-| [ChatGPT](#chatgpt)                           | Custom MCP server                     |
-| [Every agent at once](#every-agent-at-once)   | `npx add-mcp`                         |
-| [Any other MCP client](#any-other-mcp-client) | Server URL                            |
+| Agent                                                                    | How to install                         |
+| ------------------------------------------------------------------------ | -------------------------------------- |
+| [Claude Code](#install-for-claude-code)                                  | Plugin marketplace                     |
+| [Claude desktop and claude.ai](#install-for-claude-desktop-and-claudeai) | Plugin marketplace or custom connector |
+| [Cursor](#one-click)                                                     | One-click button                       |
+| [VS Code](#one-click)                                                    | One-click button or `code --add-mcp`   |
+| [Kiro](#one-click)                                                       | One-click button                       |
+| [Codex](#codex)                                                          | Plugin marketplace or `codex mcp add`  |
+| [GitHub Copilot CLI](#github-copilot-cli)                                | Plugin marketplace                     |
+| [Gemini CLI](#gemini-cli)                                                | `gemini mcp add`                       |
+| [ChatGPT](#chatgpt)                                                      | Custom MCP server                      |
+| [Every agent at once](#every-agent-at-once)                              | `npx add-mcp`                          |
+| [Any other MCP client](#any-other-mcp-client)                            | Server URL                             |
 
-## Install for Claude
+## Install for Claude Code
 
 ### 1. Add the marketplace
 
@@ -67,6 +68,30 @@ Install **both** region plugins:
 ```
 
 Both servers will be present. When a task is ambiguous, Claude will ask which region you mean before running any tools, then stick to that region's server for the rest of the task.
+
+## Install for Claude desktop and claude.ai
+
+These steps are the same in the Claude desktop app and on claude.ai, with no config files to edit. Either way, the server is saved to your Claude account, so you can use it in chat and Cowork.
+
+### As a plugin
+
+1. Open **Customize > Plugins**, select **Add marketplace**, and enter `squaredup/mcp`.
+2. Find the plugin for your region (`us` or `eu`) and select **Add**.
+3. Open the plugin's **Connectors** tab, add its server, and select **Connect** to sign in with your SquaredUp account.
+
+The plugin also reaches Claude Code the next time you start a session signed in to the same account, so you don't need to install it there as well. To pick up new versions, select **Check for updates** on the marketplace or turn on **Sync automatically**.
+
+### As a custom connector
+
+1. Open **Customize > Connectors** and select **Add custom connector**.
+2. Enter the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and select **Add**.
+3. Select **Connect** to sign in.
+
+The Free plan allows one custom connector.
+
+### Team and Enterprise plans
+
+Members can't add custom connectors themselves, so an Owner adds the server for the organization first. In **Organization settings > Connectors**, select **Add**, then **Custom**, choose **Web** if asked, and enter your region's server URL. Members then find it under **Customize > Connectors** with a **Custom** label and select **Connect**. The same applies to the plugin: if its **Connectors** tab shows the server as **Not added**, ask an Owner to add it.
 
 ## Manual MCP configuration (no plugin)
 
