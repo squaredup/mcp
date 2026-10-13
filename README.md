@@ -7,6 +7,21 @@ The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Insta
 - **One MCP server for your region** - browser OAuth, nothing to configure, no API keys to manage.
 - **Built-in skills** - the server's `get_skill` tool guides your agent through real SquaredUp workflows: exploring a tenant, reading dashboards, querying data streams and the entity graph, working with KPIs, cloning workspaces, managing integrations, alerting and notification channels, permissions and sharing, scheduled reports, and managing users. There is nothing extra to install.
 
+## Choose your agent
+
+| Agent                                         | How to install                        |
+| --------------------------------------------- | ------------------------------------- |
+| [Claude Code](#install-for-claude)            | Plugin marketplace                    |
+| [Cursor](#one-click)                          | One-click button                      |
+| [VS Code](#one-click)                         | One-click button or `code --add-mcp`  |
+| [Kiro](#one-click)                            | One-click button                      |
+| [Codex](#codex)                               | Plugin marketplace or `codex mcp add` |
+| [GitHub Copilot CLI](#github-copilot-cli)     | Plugin marketplace                    |
+| [Gemini CLI](#gemini-cli)                     | `gemini mcp add`                      |
+| [ChatGPT](#chatgpt)                           | Custom MCP server                     |
+| [Every agent at once](#every-agent-at-once)   | `npx add-mcp`                         |
+| [Any other MCP client](#any-other-mcp-client) | Server URL                            |
+
 ## Install for Claude
 
 ### 1. Add the marketplace
@@ -107,7 +122,9 @@ code --add-mcp '{"name":"squaredup-us","type":"http","url":"https://mcp.squaredu
 
 The commands below are for the US region. For EU, use `eu@squaredup`, `squaredup-eu` and `https://eu.mcp.squaredup.com/mcp` instead.
 
-**Codex** reads this repo's marketplace as is:
+#### Codex
+
+Codex reads this repo's marketplace as is:
 
 ```bash
 codex plugin marketplace add squaredup/mcp
@@ -120,20 +137,24 @@ The Codex IDE extension doesn't support plugins. Add the server directly instead
 codex mcp add squaredup-us --url https://mcp.squaredup.com/mcp
 ```
 
-**GitHub Copilot CLI** also reads this repo's marketplace:
+#### GitHub Copilot CLI
+
+Copilot CLI also reads this repo's marketplace:
 
 ```bash
 copilot plugin marketplace add squaredup/mcp
 copilot plugin install us@squaredup
 ```
 
-**Gemini CLI:**
+#### Gemini CLI
 
 ```bash
 gemini mcp add --transport http squaredup-us https://mcp.squaredup.com/mcp
 ```
 
-**Every agent on your machine at once** with [`add-mcp`](https://github.com/neondatabase/add-mcp), which writes the config for about 20 agents, including Claude Code, Codex, Cursor, VS Code, Windsurf and Zed:
+#### Every agent at once
+
+[`add-mcp`](https://github.com/neondatabase/add-mcp) writes the config for about 20 agents in one go, including Claude Code, Codex, Cursor, VS Code, Windsurf and Zed:
 
 ```bash
 npx add-mcp https://mcp.squaredup.com/mcp --name squaredup-us --all -g -y
@@ -143,11 +164,11 @@ Leave out `--all -y` to choose the agents yourself. Skip Claude Code if you've a
 
 ### ChatGPT
 
-In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP server**. Paste your region's endpoint and sign in when prompted. Whether you can add custom servers depends on your plan and workspace settings.
+In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP server**. Paste the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and sign in when prompted. Whether you can add custom servers depends on your plan and workspace settings.
 
 ### Any other MCP client
 
-Any client that supports streamable HTTP and OAuth works. Point it at your region's endpoint from the [table above](#2-install-your-region).
+Any client that supports streamable HTTP and OAuth works. Point it at the server URL for your region: `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU).
 
 ## Installed the skills with `npx skills`?
 
