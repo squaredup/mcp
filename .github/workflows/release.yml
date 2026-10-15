@@ -2,38 +2,56 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to publish, without a leading v"
-        required: true
+
+concurrency:
+  group: registry
+  cancel-in-progress: false
 
 jobs:
-  registry:
-    name: Publish to MCP Registry
+  check:
+    name: Find unpublished versions
     runs-on: ubuntu-latest
     if: ${{ vars.REGISTRY_PUBLISH_ENABLED == 'true' }}
+    permissions:
+      contents: read
+    outputs:
+      files: ${{ steps.pending.outputs.files }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Compare server.json versions with the registry
+        id: pending
+        run: |
+          pending=""
+          for dir in plugins/us plugins/eu; do
+            name=$(jq -r .name "$dir/server.json")
+            version=$(jq -r .version "$dir/server.json")
+            plugin_version=$(jq -r .version "$dir/.claude-plugin/plugin.json")
+            if [ "$version" != "$plugin_version" ]; then
+              echo "::error file=$dir/server.json::version $version does not match $dir/.claude-plugin/plugin.json version $plugin_version"
+              exit 1
+            fi
+            status=$(curl -s -o /dev/null -w '%{http_code}' "https://registry.modelcontextprotocol.io/v0.1/servers/${name/\//%2F}/versions/$version")
+            case "$status" in
+              200) echo "$name $version is already published" ;;
+              404) echo "$name $version will be published"; pending="$pending $dir/server.json" ;;
+              *) echo "::error::registry returned HTTP $status for $name $version"; exit 1 ;;
+            esac
+          done
+          echo "files=${pending# }" >> "$GITHUB_OUTPUT"
+
+  registry:
+    name: Publish to MCP Registry
+    needs: check
+    if: ${{ needs.check.outputs.files != '' }}
+    runs-on: ubuntu-latest
     environment: release
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v7
-
-      - name: Resolve version
-        id: version
-        env:
-          INPUT_VERSION: ${{ inputs.version }}
-        run: echo "version=${INPUT_VERSION:-${GITHUB_REF#refs/tags/v}}" >> "$GITHUB_OUTPUT"
-
-      - name: Stamp version into server.json
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          for file in plugins/us/server.json plugins/eu/server.json; do
-            jq --arg v "$VERSION" '.version = $v' "$file" > server.tmp && mv server.tmp "$file"
-            cat "$file"
-          done
 
       - name: Install mcp-publisher
         run: |
@@ -44,8 +62,10 @@ jobs:
         env:
           MCP_REGISTRY_DNS_KEY: ${{ secrets.MCP_REGISTRY_DNS_KEY }}
 
-      - name: Publish US
-        run: ./mcp-publisher publish plugins/us/server.json
-
-      - name: Publish EU
-        run: ./mcp-publisher publish plugins/eu/server.json
+      - name: Publish
+        env:
+          FILES: ${{ needs.check.outputs.files }}
+        run: |
+          for file in $FILES; do
+            ./mcp-publisher publish "$file"
+          done
