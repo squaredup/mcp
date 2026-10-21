@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: registry
+  group: release
   cancel-in-progress: false
 
 jobs:
@@ -145,8 +145,21 @@ jobs:
           done
           echo "ready=true" >> "$GITHUB_OUTPUT"
 
+      - name: Extract the release notes from the changelog
+        if: ${{ steps.build.outputs.ready == 'true' }}
+        run: |
+          awk -v version="$VERSION" '
+            index($0, "## [" version "]") == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error file=CHANGELOG.md::no section for $VERSION"
+            exit 1
+          fi
+
       - name: Create the release
         if: ${{ steps.build.outputs.ready == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "m365-v$VERSION" --target "$GITHUB_SHA" --title "Microsoft 365 packages $VERSION" --generate-notes dist/*.zip
+        run: gh release create "m365-v$VERSION" --target "$GITHUB_SHA" --title "Microsoft 365 packages $VERSION" --notes-file notes.md dist/*.zip
