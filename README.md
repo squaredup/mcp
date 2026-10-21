@@ -17,6 +17,7 @@ The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Insta
 | [VS Code](#one-click)                                                    | One-click button or `code --add-mcp`   |
 | [Codex](#codex)                                                          | Plugin marketplace or `codex mcp add`  |
 | [GitHub Copilot CLI](#github-copilot-cli)                                | Plugin marketplace                     |
+| [Antigravity CLI](#antigravity-cli)                                      | Plugin from this repo                  |
 | [Gemini CLI](#gemini-cli)                                                | `gemini mcp add`                       |
 | [ChatGPT](#chatgpt)                                                      | Custom MCP server                      |
 | [Other MCP clients](#other-mcp-clients)                                  | Server URL                             |
@@ -168,7 +169,19 @@ copilot plugin marketplace add squaredup/mcp
 copilot plugin install us@squaredup
 ```
 
+#### Antigravity CLI
+
+Antigravity CLI installs the region plugin straight from this repo:
+
+```bash
+agy plugin install https://github.com/squaredup/mcp/tree/main/plugins/us
+```
+
+The plugin is named `squaredup-us` (`squaredup-eu` for EU). Install by the region's folder, not the repo root: the root URL installs both regions.
+
 #### Gemini CLI
+
+Gemini CLI has been replaced by Antigravity CLI for most accounts. If you still use it:
 
 ```bash
 gemini mcp add --transport http squaredup-us https://mcp.squaredup.com/mcp
@@ -205,5 +218,11 @@ Region plugins are version-pinned, so you receive updates when we publish a new 
 .claude-plugin/marketplace.json   # marketplace "squaredup" -> us, eu
 plugins/
   us/       .mcp.json              # squaredup-us -> mcp.squaredup.com
+            mcp_config.json        # the same server for Antigravity
+            server.json            # MCP Registry entry (com.squaredup/us)
   eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com
+            mcp_config.json        # the same server for Antigravity
+            server.json            # MCP Registry entry (com.squaredup/eu)
 ```
+
+Each region folder is a Claude Code plugin (`.claude-plugin/plugin.json`) and an Antigravity plugin (`.antigravity-plugin/plugin.json`). Antigravity can convert a Claude Code plugin on install, but it drops the server URL of an HTTP server, so the region folders carry their own `mcp_config.json`.
