@@ -141,6 +141,12 @@ VS Code also takes the server from the command line:
 code --add-mcp '{"name":"squaredup-us","type":"http","url":"https://mcp.squaredup.com/mcp"}'
 ```
 
+VS Code can also install this repo's plugins (an experimental setting). Add the marketplace to your settings, then search the Extensions view for `@agentPlugins` and install the plugin for your region:
+
+```json
+"chat.plugins.marketplaces": ["squaredup/mcp"]
+```
+
 ### Command line
 
 The commands below are for the US region. For EU, use `eu@squaredup`, `squaredup-eu` and `https://eu.mcp.squaredup.com/mcp` instead.

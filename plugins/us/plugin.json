@@ -1,0 +1,15 @@
+{
+    "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+    "name": "squaredup-us",
+    "version": "1.2.0",
+    "description": "Query and manage SquaredUp dashboards, data streams, the knowledge graph, and KPIs in the US region.",
+    "author": {
+        "name": "SquaredUp",
+        "email": "support@squaredup.com",
+        "url": "https://squaredup.com"
+    },
+    "homepage": "https://docs.squaredup.com/ai-features/squaredup-mcp",
+    "repository": "https://github.com/squaredup/mcp",
+    "license": "MIT",
+    "keywords": ["squaredup", "observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi", "mcp"]
+}
