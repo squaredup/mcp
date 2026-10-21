@@ -11,28 +11,62 @@ concurrency:
 
 jobs:
   check:
-    name: Find unpublished versions
+    name: Check manifests and find unpublished versions
     runs-on: ubuntu-latest
-    if: ${{ vars.REGISTRY_PUBLISH_ENABLED == 'true' }}
     permissions:
       contents: read
     outputs:
       files: ${{ steps.pending.outputs.files }}
+      m365_version: ${{ steps.manifests.outputs.m365_version }}
+      tagged: ${{ steps.tag.outputs.tagged }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-tags: true
+
+      - name: Check that US and EU agree
+        id: manifests
+        run: |
+          # Each vendor's manifests version on their own, but US and EU ship together.
+          same_version() {
+            us=$(jq -r .version "${1/REGION/us}")
+            eu=$(jq -r .version "${1/REGION/eu}")
+            if [ "$us" != "$eu" ]; then
+              echo "::error file=${1/REGION/eu}::version $eu does not match $us in ${1/REGION/us}"
+              exit 1
+            fi
+          }
+          same_version plugins/REGION/.claude-plugin/plugin.json
+          same_version plugins/REGION/plugin.json
+          same_version plugins/REGION/.antigravity-plugin/plugin.json
+          same_version plugins/REGION/server.json
+          same_version plugins/REGION/.m365-plugin/manifest.json
+
+          # Every manifest for a region must point at that region's server.
+          for region in us eu; do
+            url=$(jq -r ".mcpServers[\"squaredup-$region\"].url" "plugins/$region/.mcp.json")
+            same_url() {
+              if [ "$(jq -r "$2" "$1")" != "$url" ]; then
+                echo "::error file=$1::server URL does not match $url in plugins/$region/.mcp.json"
+                exit 1
+              fi
+            }
+            same_url "plugins/$region/mcp.json" ".mcpServers[\"squaredup-$region\"].url"
+            same_url "plugins/$region/mcp_config.json" ".mcpServers[\"squaredup-$region\"].serverUrl"
+            same_url "plugins/$region/server.json" '.remotes[0].url'
+            same_url "plugins/$region/.m365-plugin/manifest.json" '.agentConnectors[0].toolSource.remoteMcpServer.mcpServerUrl'
+          done
+
+          echo "m365_version=$(jq -r .version plugins/us/.m365-plugin/manifest.json)" >> "$GITHUB_OUTPUT"
 
       - name: Compare server.json versions with the registry
         id: pending
+        if: ${{ vars.REGISTRY_PUBLISH_ENABLED == 'true' }}
         run: |
           pending=""
           for dir in plugins/us plugins/eu; do
             name=$(jq -r .name "$dir/server.json")
             version=$(jq -r .version "$dir/server.json")
-            plugin_version=$(jq -r .version "$dir/.claude-plugin/plugin.json")
-            if [ "$version" != "$plugin_version" ]; then
-              echo "::error file=$dir/server.json::version $version does not match $dir/.claude-plugin/plugin.json version $plugin_version"
-              exit 1
-            fi
             status=$(curl -s -o /dev/null -w '%{http_code}' "https://registry.modelcontextprotocol.io/v0.1/servers/${name/\//%2F}/versions/$version")
             case "$status" in
               200) echo "$name $version is already published" ;;
@@ -41,6 +75,19 @@ jobs:
             esac
           done
           echo "files=${pending# }" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether the Microsoft 365 version is released
+        id: tag
+        env:
+          VERSION: ${{ steps.manifests.outputs.m365_version }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/m365-v$VERSION" > /dev/null; then
+            echo "m365-v$VERSION is already released"
+            echo "tagged=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "m365-v$VERSION will be released"
+            echo "tagged=false" >> "$GITHUB_OUTPUT"
+          fi
 
   registry:
     name: Publish to MCP Registry
@@ -69,3 +116,37 @@ jobs:
           for file in $FILES; do
             ./mcp-publisher publish "$file"
           done
+
+  release:
+    name: Release the Microsoft 365 packages
+    needs: check
+    if: ${{ vars.RELEASE_PUBLISH_ENABLED == 'true' && needs.check.outputs.tagged == 'false' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.check.outputs.m365_version }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build the packages
+        id: build
+        run: |
+          # The OAuth registration IDs come from the Teams Developer Portal. A package without them
+          # can't sign in, so nothing is released until both are in.
+          if jq '.agentConnectors[].toolSource.remoteMcpServer.authorization.referenceId | startswith("TODO")' plugins/us/.m365-plugin/manifest.json plugins/eu/.m365-plugin/manifest.json | grep -q true; then
+            echo "::warning::an m365 referenceId is still a placeholder, so m365-v$VERSION is not released"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mkdir -p dist
+          for region in us eu; do
+            (cd "plugins/$region/.m365-plugin" && zip -qrX -D "$GITHUB_WORKSPACE/dist/squaredup-$region-m365-$VERSION.zip" manifest.json color.png outline.png skills)
+          done
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create the release
+        if: ${{ steps.build.outputs.ready == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "m365-v$VERSION" --target "$GITHUB_SHA" --title "Microsoft 365 packages $VERSION" --generate-notes dist/*.zip

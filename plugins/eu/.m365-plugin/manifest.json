@@ -1,0 +1,42 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.29",
+    "version": "1.2.0",
+    "id": "9deb0d78-8444-49b1-851c-af1e9fd551b5",
+    "developer": {
+        "name": "SquaredUp",
+        "websiteUrl": "https://squaredup.com",
+        "privacyUrl": "https://squaredup.com/privacy-policy/",
+        "termsOfUseUrl": "https://squaredup.com/terms-and-conditions/"
+    },
+    "name": {
+        "short": "SquaredUp (EU)",
+        "full": "SquaredUp (EU)"
+    },
+    "description": {
+        "short": "Query and manage SquaredUp dashboards, data streams, and KPIs.",
+        "full": "Connect Microsoft 365 Copilot to your SquaredUp organization in the EU region. Explore and read dashboards, query data streams and the knowledge graph, work with KPIs, and manage workspaces, integrations, alerting, notification channels, permissions, scheduled reports, and users. Sign in with your existing SquaredUp account. A SquaredUp subscription is required, and a SquaredUp admin must turn on MCP access for the organization."
+    },
+    "icons": {
+        "color": "color.png",
+        "outline": "outline.png"
+    },
+    "accentColor": "#1B0B53",
+    "agentConnectors": [
+        {
+            "id": "squaredup-eu",
+            "displayName": "SquaredUp (EU)",
+            "description": "Query and manage SquaredUp dashboards, data streams, the knowledge graph, and KPIs (EU region).",
+            "toolSource": {
+                "remoteMcpServer": {
+                    "mcpServerUrl": "https://eu.mcp.squaredup.com/mcp",
+                    "authorization": {
+                        "type": "OAuthPluginVault",
+                        "referenceId": "NjFiY2JiOTktM2ZmNi00Njk0LWJiMTgtNjk4N2Q2M2VlYTQ1IyM3MjVlYjhkMy1lZWM5LTQ0ZDYtOThjOC0wNmEzMTA2MjMyNWE="
+                    }
+                }
+            }
+        }
+    ],
+    "agentSkills": [{ "folder": "./skills/squaredup" }]
+}

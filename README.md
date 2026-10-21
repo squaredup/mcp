@@ -225,10 +225,16 @@ Region plugins are version-pinned, so you receive updates when we publish a new 
 plugins/
   us/       .mcp.json              # squaredup-us -> mcp.squaredup.com
             mcp_config.json        # the same server for Antigravity
+            plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
             server.json            # MCP Registry entry (com.squaredup/us)
+            .m365-plugin/          # Microsoft 365 Copilot app package, zipped on release
   eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com
             mcp_config.json        # the same server for Antigravity
+            plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
             server.json            # MCP Registry entry (com.squaredup/eu)
+            .m365-plugin/          # Microsoft 365 Copilot app package, zipped on release
 ```
 
 Each region folder is a Claude Code plugin (`.claude-plugin/plugin.json`) and an Antigravity plugin (`.antigravity-plugin/plugin.json`). Antigravity can convert a Claude Code plugin on install, but it drops the server URL of an HTTP server, so the region folders carry their own `mcp_config.json`.
+
+Each manifest has its own version, but US and EU must share it, and every manifest must point at its region's server URL. The `Release` workflow checks this on every push to `main`. See `CHANGELOG.md` for when to bump each one.

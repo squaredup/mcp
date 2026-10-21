@@ -1,16 +1,28 @@
 # Changelog
 
-All notable changes to the SquaredUp marketplace and its plugins are documented here. The marketplace follows [Semantic Versioning](https://semver.org) per plugin; each plugin's `version` lives in its `.claude-plugin/plugin.json` and must be bumped on every release.
+All notable changes to the SquaredUp marketplace and its plugins are documented here. Each vendor's manifests follow [Semantic Versioning](https://semver.org) on their own, and US and EU always share a version:
+
+| Manifests | Read by | Bump when |
+| --- | --- | --- |
+| `plugins/<region>/.claude-plugin/plugin.json` | Claude Code, the Claude apps, Codex | The Claude plugin changes |
+| `plugins/<region>/.antigravity-plugin/plugin.json` | Antigravity | The Antigravity plugin changes |
+| `plugins/<region>/plugin.json` | GitHub Copilot CLI, VS Code, `github/awesome-copilot` | The Agent Plugins plugin changes |
+| `plugins/<region>/server.json` | MCP Registry | The registry entry changes; publishes on push to `main` |
+| `plugins/<region>/.m365-plugin/manifest.json` | Microsoft 365 Copilot | The package changes; released as `m365-v<version>` on push to `main` |
 
 ## [1.2.0] - 2026-10-21
 
 ### Added
 
 - **Antigravity CLI support** - `us` and `eu` are also Antigravity plugins (`squaredup-us`, `squaredup-eu`), each with a `.antigravity-plugin/plugin.json` and an `mcp_config.json` that points at the region's server. Install with `agy plugin install https://github.com/squaredup/mcp/tree/main/plugins/us` (or `plugins/eu`). Without these files, Antigravity converts the Claude Code plugin and installs the server with no URL.
+- **Microsoft 365 Copilot packages** (`1.2.0`) - `us` and `eu` each carry a Microsoft 365 app package for Copilot Cowork and Copilot Chat in `.m365-plugin/`, which the `Release` workflow zips. Each has a connector to its region's MCP server and a `squaredup` skill that points Copilot at `get_skill`, because Microsoft 365 Copilot doesn't pass on the server's instructions. They aren't listed yet: sign-in needs the MCP server to allow Microsoft's redirect URI, and the listing goes through Partner Center. The skill sits inside `.m365-plugin/` so that Claude Code, Copilot CLI, and Antigravity don't load it; they get the same rules from the server's instructions.
+- **Agent Plugins manifests** (`1.2.0`) - `us` and `eu` each ship a `plugin.json` and `mcp.json` in the [Agent Plugins](https://agent-plugins.org) format, which GitHub Copilot CLI, VS Code, and `github/awesome-copilot` read. Copilot CLI now uses these instead of `.claude-plugin/plugin.json`, with the same server, so installs are unaffected. Antigravity still reads `.antigravity-plugin/plugin.json`, which takes precedence over a root `plugin.json`, and that manifest now carries its own version (`1.2.0`).
+- **Microsoft 365 releases** - the `Release` workflow creates a GitHub release `m365-v<version>` with both packages when the `m365` version is new. It is off until the `RELEASE_PUBLISH_ENABLED` repository variable is `true`, and releases nothing while an OAuth registration ID is a placeholder.
 
 ### Changed
 
 - **`us@squaredup`** and **`eu@squaredup`** (`1.2.0`) - no change for Claude Code, Codex or Copilot CLI; the version moves because the plugin folders gained the Antigravity files.
+- **`Release` workflow** - checks that US and EU share a version for each vendor, and that every manifest points at its region's server URL. It no longer requires `server.json` to match `.claude-plugin/plugin.json`.
 
 ## [1.1.0] - 2026-10-12
 
