@@ -3,7 +3,7 @@
     "name": "com.squaredup/us",
     "title": "SquaredUp (US)",
     "description": "Query and manage SquaredUp dashboards, data streams, the knowledge graph, and KPIs (US region).",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "repository": {
         "url": "https://github.com/squaredup/mcp",
         "source": "github"

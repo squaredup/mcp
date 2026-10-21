@@ -2,6 +2,16 @@
 
 All notable changes to the SquaredUp marketplace and its plugins are documented here. The marketplace follows [Semantic Versioning](https://semver.org) per plugin; each plugin's `version` lives in its `.claude-plugin/plugin.json` and must be bumped on every release.
 
+## [1.2.0] - 2026-10-21
+
+### Added
+
+- **Antigravity CLI support** - `us` and `eu` are also Antigravity plugins (`squaredup-us`, `squaredup-eu`), each with a `.antigravity-plugin/plugin.json` and an `mcp_config.json` that points at the region's server. Install with `agy plugin install https://github.com/squaredup/mcp/tree/main/plugins/us` (or `plugins/eu`). Without these files, Antigravity converts the Claude Code plugin and installs the server with no URL.
+
+### Changed
+
+- **`us@squaredup`** and **`eu@squaredup`** (`1.2.0`) - no change for Claude Code, Codex or Copilot CLI; the version moves because the plugin folders gained the Antigravity files.
+
 ## [1.1.0] - 2026-10-12
 
 ### Removed
