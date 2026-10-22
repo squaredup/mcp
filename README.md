@@ -20,6 +20,7 @@ The official [SquaredUp](https://squaredup.com) marketplace for AI agents. Insta
 | [Antigravity CLI](#antigravity-cli)                                      | Plugin from this repo                  |
 | [Gemini CLI](#gemini-cli)                                                | `gemini mcp add`                       |
 | [ChatGPT](#chatgpt)                                                      | Custom MCP server                      |
+| [Copilot Studio](#copilot-studio)                                        | MCP tool in your agent                 |
 | [Other MCP clients](#other-mcp-clients)                                  | Server URL                             |
 
 ## Install for Claude Code
@@ -196,6 +197,26 @@ gemini mcp add --transport http squaredup-us https://mcp.squaredup.com/mcp
 ### ChatGPT
 
 In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP server**. Paste the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and sign in when prompted. Whether you can add custom servers depends on your plan and workspace settings.
+
+### Copilot Studio
+
+To use SquaredUp in an agent you build in Copilot Studio, add the server as an MCP tool. You need a Copilot Studio license; a trial can test the agent but can't publish it.
+
+1. Open your agent and, on the **Build** tab, select **+** next to **Tools**.
+2. In **Add a tool**, select **+ Add > Model Context Protocol (MCP)**.
+3. Fill in the form:
+   - **Server name:** `SquaredUp`
+   - **Server description:** the agent uses this to decide when to call SquaredUp, e.g. `Query and manage SquaredUp dashboards, data streams, the knowledge graph, and KPIs.`
+   - **Server URL:** `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU)
+4. Under **Authentication**, choose **OAuth 2.0** and leave **Configuration type** as **Dynamic (with discovery)**. There is no client ID or secret to enter. Select **Add**.
+5. In **Select a connection**, open the **Connection** list, select **Create new connection**, then **Create**. Sign in with your SquaredUp account in the pop-up and choose your organization if asked. If no pop-up appears, allow pop-ups for Copilot Studio and select **Create** again.
+6. Select **Add**.
+
+Every SquaredUp tool is on by default. Copilot Studio works best with fewer tools, so select **SquaredUp** under **Tools**, turn off **Allow all**, choose just the tools your agent needs, and select **Done**. Try the agent on the **Preview** tab, e.g. ask it to list your SquaredUp workspaces.
+
+To use the agent in Teams and Microsoft 365 Copilot, select **+** next to **Channels**, choose **Teams + Microsoft 365**, and select **Add channel**, then **Publish**. The tool's **Authentication** is **End user account** by default, so each user signs in with their own SquaredUp account the first time the agent calls a tool.
+
+If you can't add the server, a Power Platform data policy may be blocking custom connectors. Ask your Power Platform admin to allow it.
 
 ### Other MCP clients
 
