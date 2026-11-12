@@ -10,6 +10,12 @@ All notable changes to the SquaredUp marketplace and its plugins are documented 
 | `plugins/<region>/server.json` | MCP Registry | The registry entry changes; publishes on push to `main` |
 | `plugins/<region>/.m365-plugin/manifest.json` | Microsoft 365 Copilot | The package changes; released as `m365-v<version>` on push to `main` |
 
+## [1.2.1] - 2026-11-12
+
+### Changed
+
+- **All manifests** (`1.2.1`) - the Claude Code, Agent Plugins, Antigravity, MCP Registry, and Microsoft 365 manifests for `us` and `eu` move to `1.2.1` so that marketplaces and clients pick up the current plugin contents. Nothing changes for installs.
+
 ## [1.2.0] - 2026-10-21
 
 ### Added

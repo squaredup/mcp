@@ -1,7 +1,7 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.29/MicrosoftTeams.schema.json",
     "manifestVersion": "1.29",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "id": "75ce86f3-5982-42af-a8a8-298ac81f03c7",
     "developer": {
         "name": "SquaredUp",
