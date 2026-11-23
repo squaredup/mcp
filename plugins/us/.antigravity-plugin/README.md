@@ -16,7 +16,12 @@ If your organization is hosted in the EU region, install `squaredup-eu` instead.
 
 ## Sign in
 
-The plugin installs enabled. The first time Antigravity connects to the server, it asks you to sign in. If it doesn't, open **Customizations** > **Installed**, and under **MCP Servers** select **Authenticate** next to the SquaredUp server. Sign in with your SquaredUp account and choose your organization if asked.
+The plugin installs enabled. The first time Antigravity connects to the server, it asks you to sign in. If it doesn't:
+
+- **Antigravity App:** open **Customizations** > **Installed**, and under **MCP Servers** select **Authenticate** next to the SquaredUp server.
+- **Antigravity CLI:** run `/plugin`, expand `squaredup-us` under **Installed**, and choose **Sign in**.
+
+Sign in with your SquaredUp account and choose your organization if asked.
 
 ## Try it
 
