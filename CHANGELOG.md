@@ -10,6 +10,17 @@ All notable changes to the SquaredUp marketplace and its plugins are documented 
 | `plugins/<region>/server.json` | MCP Registry | The registry entry changes; publishes on push to `main` |
 | `plugins/<region>/.m365-plugin/manifest.json` | Microsoft 365 Copilot | The package changes; released as `m365-v<version>` on push to `main` |
 
+## [1.3.0] - 2026-11-23
+
+### Added
+
+- **Antigravity Marketplace listing details** - `squaredup-us` and `squaredup-eu` (`1.3.0`) now carry everything the [Antigravity Marketplace](https://antigravity.google/docs/build-plugins/) asks for: a display name, a logo (`assets/logo.png`, the SquaredUp icon with transparent padding), three suggested prompts, author, homepage, repository, license and keywords in `.antigravity-plugin/plugin.json`, and a pre-install `.antigravity-plugin/README.md`. The MCP server and sign-in are unchanged: Antigravity still registers itself with the server through Dynamic Client Registration, so `mcp_config.json` needs no `oauth` block.
+- **`squaredup` skill for Antigravity** - `squaredup-us` and `squaredup-eu` (`1.3.0`) each carry a `squaredup` skill that points the agent at `get_skill`, the same as the Microsoft 365 packages. Antigravity loads MCP tools lazily and saves the server's instructions to a file instead of the prompt, so the agent wasn't reliably told to read SquaredUp's skills first. The skill sits in `antigravity-skills/`, which only the Antigravity manifest names, so Claude Code and Copilot CLI don't load it; they still get the same rules from the server's instructions.
+
+### Changed
+
+- **`Release` workflow** - installs the Antigravity CLI and runs `agy plugin validate` on `us` and `eu`. It fails on errors and on warnings, such as a missing logo or a name the Marketplace rejects, except the expected ones for other tools' files (`.mcp.json`, `mcp.json`, and the root `plugin.json`).
+
 ## [1.2.1] - 2026-11-12
 
 ### Changed

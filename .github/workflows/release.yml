@@ -59,6 +59,35 @@ jobs:
 
           echo "m365_version=$(jq -r .version plugins/us/.m365-plugin/manifest.json)" >> "$GITHUB_OUTPUT"
 
+      - name: Validate the Antigravity plugins
+        run: |
+          # The installer checks the download's SHA-512 against Antigravity's release manifest.
+          curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- --dir "$RUNNER_TEMP/agy"
+          agy="$RUNNER_TEMP/agy/agy"
+          "$agy" --version
+
+          for region in us eu; do
+            # Prints the report and fails on errors.
+            "$agy" plugin validate "plugins/$region"
+
+            # Also fail on warnings, such as a missing logo or a name the Marketplace rejects, except the ones
+            # for files Antigravity ignores because they belong to other tools. This filter is the one
+            # https://antigravity.google/docs/build-plugins/ recommends for multi-tool repositories.
+            if ! "$agy" plugin validate --json "plugins/$region" | jq -e '
+              .manifest as $manifest |
+              [.findings[] | select(
+                .severity == "error" or (
+                  .severity == "warning" and
+                  (.file != ".mcp.json" and .file != "mcp.json" and .file != "AGENTS.md") and
+                  (.file != "plugin.json" or $manifest == "plugin.json")
+                )
+              )] | length == 0
+            ' > /dev/null; then
+              echo "::error file=plugins/$region/.antigravity-plugin/plugin.json::agy plugin validate found warnings for plugins/$region; see the report above"
+              exit 1
+            fi
+          done
+
       - name: Compare server.json versions with the registry
         id: pending
         if: ${{ vars.REGISTRY_PUBLISH_ENABLED == 'true' }}
