@@ -19,7 +19,7 @@ All notable changes to the SquaredUp marketplace and its plugins are documented 
 
 ### Changed
 
-- **`Release` workflow** - also checks that each Antigravity manifest's `logo` points at a file in its plugin folder.
+- **`Release` workflow** - installs the Antigravity CLI and runs `agy plugin validate` on `us` and `eu`. It fails on errors and on warnings, such as a missing logo or a name the Marketplace rejects, except the expected ones for other tools' files (`.mcp.json`, `mcp.json`, and the root `plugin.json`).
 
 ## [1.2.1] - 2026-11-12
 
