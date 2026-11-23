@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "squaredup-au": {
+            "type": "http",
+            "url": "https://au.mcp.squaredup.com/mcp"
+        }
+    }
+}

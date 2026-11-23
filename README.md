@@ -45,29 +45,34 @@ Pick the plugin for the region your SquaredUp organization is hosted in:
 /plugin install eu@squaredup     # EU
 ```
 
-The region plugin installs **only your region's MCP server**; the other region is never added.
+```
+/plugin install au@squaredup     # AU
+```
+
+The region plugin installs **only your region's MCP server**; the other regions are never added.
 
 | Region | Plugin         | Server         | Endpoint                           |
 | ------ | -------------- | -------------- | ---------------------------------- |
 | US     | `us@squaredup` | `squaredup-us` | `https://mcp.squaredup.com/mcp`    |
 | EU     | `eu@squaredup` | `squaredup-eu` | `https://eu.mcp.squaredup.com/mcp` |
+| AU     | `au@squaredup` | `squaredup-au` | `https://au.mcp.squaredup.com/mcp` |
 
-Not sure which region you're on? Check the URL you use to sign in to SquaredUp - EU tenants use an `eu.` host.
+Not sure which region you're on? Check the URL you use to sign in to SquaredUp - EU tenants use an `eu.` host and AU tenants use an `au.` host.
 
 ### 3. Authenticate
 
 Run `/mcp`, select your region's server, and sign in. Authentication is browser-based using your existing SquaredUp account - there are no tokens to copy. The first tool call will prompt you if you haven't signed in yet.
 
-### Organizations that span both regions
+### Organizations that span more than one region
 
-Install **both** region plugins:
+Install the plugin for **each** region you use, for example:
 
 ```
 /plugin install us@squaredup
 /plugin install eu@squaredup
 ```
 
-Both servers will be present. When a task is ambiguous, Claude will ask which region you mean before running any tools, then stick to that region's server for the rest of the task.
+Each region's server will be present. When a task is ambiguous, Claude will ask which region you mean before running any tools, then stick to that region's server for the rest of the task.
 
 ## Install for Claude desktop and claude.ai
 
@@ -76,7 +81,7 @@ These steps are the same in the Claude desktop app and on claude.ai, with no con
 ### As a plugin
 
 1. Open **Customize > Plugins**, select **Add marketplace**, and enter `squaredup/mcp`.
-2. Find the plugin for your region (`us` or `eu`) and select **Add**.
+2. Find the plugin for your region (`us`, `eu` or `au`) and select **Add**.
 3. Open the plugin's **Connectors** tab, add its server, and select **Connect** to sign in with your SquaredUp account.
 
 The plugin also reaches Claude Code the next time you start a session signed in to the same account, so you don't need to install it there as well. To pick up new versions, select **Check for updates** on the marketplace or turn on **Sync automatically**.
@@ -84,7 +89,7 @@ The plugin also reaches Claude Code the next time you start a session signed in 
 ### As a custom connector
 
 1. Open **Customize > Connectors** and select **Add custom connector**.
-2. Enter the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and select **Add**.
+2. Enter the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU, `https://au.mcp.squaredup.com/mcp` for AU) and select **Add**.
 3. Select **Connect** to sign in.
 
 The Free plan allows one custom connector.
@@ -123,6 +128,19 @@ If you'd rather wire the MCP server up directly, add the entry for your region t
 }
 ```
 
+**AU:**
+
+```json
+{
+    "mcpServers": {
+        "squaredup": {
+            "type": "http",
+            "url": "https://au.mcp.squaredup.com/mcp"
+        }
+    }
+}
+```
+
 The OAuth flow is identical - the first tool call prompts you to sign in. Skills come from the server itself, so you get them with or without the plugin.
 
 ## Install for other agents
@@ -131,10 +149,11 @@ Every option below adds only your region's MCP server. Skills come with the serv
 
 ### One click
 
-| Agent   | US                                                                                                                                                                                                                                                                                                                      | EU                                                                                                                                                                                                                                                                                                                         |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cursor  | [![Add US server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-us&config=eyJ1cmwiOiJodHRwczovL21jcC5zcXVhcmVkdXAuY29tL21jcCJ9)                                                                                                                            | [![Add EU server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-eu&config=eyJ1cmwiOiJodHRwczovL2V1Lm1jcC5zcXVhcmVkdXAuY29tL21jcCJ9)                                                                                                                           |
-| VS Code | [![Add US server to VS Code](https://img.shields.io/badge/VS_Code-Install_US_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-us&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.squaredup.com%2Fmcp%22%7D) | [![Add EU server to VS Code](https://img.shields.io/badge/VS_Code-Install_EU_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-eu&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Feu.mcp.squaredup.com%2Fmcp%22%7D) |
+| Region | Cursor                                                                                                                                                                                           | VS Code                                                                                                                                                                                                                                                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US     | [![Add US server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-us&config=eyJ1cmwiOiJodHRwczovL21jcC5zcXVhcmVkdXAuY29tL21jcCJ9)     | [![Add US server to VS Code](https://img.shields.io/badge/VS_Code-Install_US_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-us&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fmcp.squaredup.com%2Fmcp%22%7D)    |
+| EU     | [![Add EU server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-eu&config=eyJ1cmwiOiJodHRwczovL2V1Lm1jcC5zcXVhcmVkdXAuY29tL21jcCJ9) | [![Add EU server to VS Code](https://img.shields.io/badge/VS_Code-Install_EU_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-eu&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Feu.mcp.squaredup.com%2Fmcp%22%7D) |
+| AU     | [![Add AU server to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=squaredup-au&config=eyJ1cmwiOiJodHRwczovL2F1Lm1jcC5zcXVhcmVkdXAuY29tL21jcCJ9) | [![Add AU server to VS Code](https://img.shields.io/badge/VS_Code-Install_AU_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=squaredup-au&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fau.mcp.squaredup.com%2Fmcp%22%7D) |
 
 VS Code also takes the server from the command line:
 
@@ -150,7 +169,7 @@ VS Code can also install this repo's plugins (an experimental setting). Add the 
 
 ### Command line
 
-The commands below are for the US region. For EU, use `eu@squaredup`, `squaredup-eu` and `https://eu.mcp.squaredup.com/mcp` instead.
+The commands below are for the US region. For EU, use `eu@squaredup`, `squaredup-eu` and `https://eu.mcp.squaredup.com/mcp` instead. For AU, use `au@squaredup`, `squaredup-au` and `https://au.mcp.squaredup.com/mcp`.
 
 #### Codex
 
@@ -184,7 +203,7 @@ Antigravity CLI installs the region plugin straight from this repo:
 agy plugin install https://github.com/squaredup/mcp/tree/main/plugins/us
 ```
 
-The plugin is named `squaredup-us` (`squaredup-eu` for EU). Install by the region's folder, not the repo root: the root URL installs both regions.
+The plugin is named `squaredup-us` (`squaredup-eu` for EU, `squaredup-au` for AU). Install by the region's folder, not the repo root: the root URL installs every region.
 
 #### Gemini CLI
 
@@ -196,7 +215,7 @@ gemini mcp add --transport http squaredup-us https://mcp.squaredup.com/mcp
 
 ### ChatGPT
 
-In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP server**. Paste the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU) and sign in when prompted. Whether you can add custom servers depends on your plan and workspace settings.
+In ChatGPT on the web, go to **Plugins**, select **+**, then **Add custom MCP server**. Paste the server URL for your region (`https://mcp.squaredup.com/mcp` for US, `https://eu.mcp.squaredup.com/mcp` for EU, `https://au.mcp.squaredup.com/mcp` for AU) and sign in when prompted. Whether you can add custom servers depends on your plan and workspace settings.
 
 ### Copilot Studio
 
@@ -207,7 +226,7 @@ To use SquaredUp in an agent you build in Copilot Studio, add the server as an M
 3. Fill in the form:
    - **Server name:** `SquaredUp`
    - **Server description:** the agent uses this to decide when to call SquaredUp, e.g. `Query and manage SquaredUp dashboards, data streams, the knowledge graph, and KPIs.`
-   - **Server URL:** `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU)
+   - **Server URL:** `https://mcp.squaredup.com/mcp` (US), `https://eu.mcp.squaredup.com/mcp` (EU) or `https://au.mcp.squaredup.com/mcp` (AU)
 4. Under **Authentication**, choose **OAuth 2.0** and leave **Configuration type** as **Dynamic (with discovery)**. There is no client ID or secret to enter. Select **Add**.
 5. In **Select a connection**, open the **Connection** list, select **Create new connection**, then **Create**. Sign in with your SquaredUp account in the pop-up and choose your organization if asked. If no pop-up appears, allow pop-ups for Copilot Studio and select **Create** again.
 6. Select **Add**.
@@ -220,7 +239,7 @@ If you can't add the server, a Power Platform data policy may be blocking custom
 
 ### Other MCP clients
 
-Other MCP clients that support streamable HTTP and OAuth may work, but we've only tested the ones above. Point them at the server URL for your region: `https://mcp.squaredup.com/mcp` (US) or `https://eu.mcp.squaredup.com/mcp` (EU). If yours can't sign in, [contact SquaredUp support](https://docs.squaredup.com/submit-ticket).
+Other MCP clients that support streamable HTTP and OAuth may work, but we've only tested the ones above. Point them at the server URL for your region: `https://mcp.squaredup.com/mcp` (US), `https://eu.mcp.squaredup.com/mcp` (EU) or `https://au.mcp.squaredup.com/mcp` (AU). If yours can't sign in, [contact SquaredUp support](https://docs.squaredup.com/submit-ticket).
 
 ## Installed the skills with `npx skills`?
 
@@ -242,7 +261,7 @@ Region plugins are version-pinned, so you receive updates when we publish a new 
 ## Repository layout
 
 ```
-.claude-plugin/marketplace.json   # marketplace "squaredup" -> us, eu
+.claude-plugin/marketplace.json   # marketplace "squaredup" -> us, eu, au
 plugins/
   us/       .mcp.json              # squaredup-us -> mcp.squaredup.com
             mcp_config.json        # the same server for Antigravity
@@ -254,8 +273,13 @@ plugins/
             plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
             server.json            # MCP Registry entry (com.squaredup/eu)
             .m365-plugin/          # Microsoft 365 Copilot app package, zipped on release
+  au/       .mcp.json              # squaredup-au -> au.mcp.squaredup.com
+            mcp_config.json        # the same server for Antigravity
+            plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
+            server.json            # MCP Registry entry (com.squaredup/au)
+            .m365-plugin/          # Microsoft 365 Copilot app package, zipped on release
 ```
 
 Each region folder is a Claude Code plugin (`.claude-plugin/plugin.json`) and an Antigravity plugin (`.antigravity-plugin/plugin.json`). Antigravity can convert a Claude Code plugin on install, but it drops the server URL of an HTTP server, so the region folders carry their own `mcp_config.json`.
 
-Each manifest has its own version, but US and EU must share it, and every manifest must point at its region's server URL. The `Release` workflow checks this on every push to `main`. See `CHANGELOG.md` for when to bump each one.
+Each manifest has its own version, but every region must share it, and every manifest must point at its region's server URL. The `Release` workflow checks this on every push to `main`. See `CHANGELOG.md` for when to bump each one.

@@ -1,0 +1,9 @@
+{
+    "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+    "mcpServers": {
+        "squaredup-au": {
+            "type": "streamable-http",
+            "url": "https://au.mcp.squaredup.com/mcp"
+        }
+    }
+}
