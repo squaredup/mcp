@@ -246,11 +246,15 @@ Region plugins are version-pinned, so you receive updates when we publish a new 
 plugins/
   us/       .mcp.json              # squaredup-us -> mcp.squaredup.com
             mcp_config.json        # the same server for Antigravity
+            .antigravity-plugin/   # Antigravity manifest and Marketplace README
+            assets/logo.png        # Antigravity Marketplace logo
             plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
             server.json            # MCP Registry entry (com.squaredup/us)
             .m365-plugin/          # Microsoft 365 Copilot app package, zipped on release
   eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com
             mcp_config.json        # the same server for Antigravity
+            .antigravity-plugin/   # Antigravity manifest and Marketplace README
+            assets/logo.png        # Antigravity Marketplace logo
             plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
             server.json            # MCP Registry entry (com.squaredup/eu)
             .m365-plugin/          # Microsoft 365 Copilot app package, zipped on release

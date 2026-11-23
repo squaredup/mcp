@@ -10,6 +10,16 @@ All notable changes to the SquaredUp marketplace and its plugins are documented 
 | `plugins/<region>/server.json` | MCP Registry | The registry entry changes; publishes on push to `main` |
 | `plugins/<region>/.m365-plugin/manifest.json` | Microsoft 365 Copilot | The package changes; released as `m365-v<version>` on push to `main` |
 
+## [1.3.0] - 2026-11-23
+
+### Added
+
+- **Antigravity Marketplace listing details** - `squaredup-us` and `squaredup-eu` (`1.3.0`) now carry everything the [Antigravity Marketplace](https://antigravity.google/docs/build-plugins/) asks for: a display name, a logo (`assets/logo.png`, the SquaredUp icon with transparent padding), three suggested prompts, author, homepage, repository, license and keywords in `.antigravity-plugin/plugin.json`, and a pre-install `.antigravity-plugin/README.md`. The MCP server and sign-in are unchanged: Antigravity still registers itself with the server through Dynamic Client Registration, so `mcp_config.json` needs no `oauth` block.
+
+### Changed
+
+- **`Release` workflow** - also checks that each Antigravity manifest's `logo` points at a file in its plugin folder.
+
 ## [1.2.1] - 2026-11-12
 
 ### Changed

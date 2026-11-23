@@ -1,6 +1,22 @@
 {
     "$schema": "https://antigravity.google/schemas/v1/plugin.json",
     "name": "squaredup-eu",
-    "version": "1.2.1",
-    "description": "Connect Antigravity to your SquaredUp organization in the EU region."
+    "displayName": "SquaredUp (EU)",
+    "version": "1.3.0",
+    "description": "Query and manage SquaredUp dashboards, data streams, the knowledge graph, and KPIs for your organization in the EU region.",
+    "logo": "assets/logo.png",
+    "suggestedPrompts": [
+        "List my SquaredUp workspaces and summarize what each one monitors",
+        "Find a service in my SquaredUp knowledge graph and show what it depends on",
+        "Build a SquaredUp dashboard that charts data from one of my integrations"
+    ],
+    "author": {
+        "name": "SquaredUp",
+        "email": "support@squaredup.com",
+        "url": "https://squaredup.com"
+    },
+    "homepage": "https://docs.squaredup.com/ai-features/squaredup-mcp",
+    "repository": "https://github.com/squaredup/mcp",
+    "license": "MIT",
+    "keywords": ["squaredup", "observability", "monitoring", "dashboard", "chart", "metric", "data", "kpi", "mcp"]
 }

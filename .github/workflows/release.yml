@@ -55,6 +55,13 @@ jobs:
             same_url "plugins/$region/mcp_config.json" ".mcpServers[\"squaredup-$region\"].serverUrl"
             same_url "plugins/$region/server.json" '.remotes[0].url'
             same_url "plugins/$region/.m365-plugin/manifest.json" '.agentConnectors[0].toolSource.remoteMcpServer.mcpServerUrl'
+
+            # Antigravity resolves the logo from the plugin root and shows a generic icon if it's missing.
+            logo=$(jq -r .logo "plugins/$region/.antigravity-plugin/plugin.json")
+            if [ ! -f "plugins/$region/$logo" ]; then
+              echo "::error file=plugins/$region/.antigravity-plugin/plugin.json::logo $logo is not in plugins/$region"
+              exit 1
+            fi
           done
 
           echo "m365_version=$(jq -r .version plugins/us/.m365-plugin/manifest.json)" >> "$GITHUB_OUTPUT"
