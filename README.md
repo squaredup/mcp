@@ -247,6 +247,7 @@ plugins/
   us/       .mcp.json              # squaredup-us -> mcp.squaredup.com
             mcp_config.json        # the same server for Antigravity
             .antigravity-plugin/   # Antigravity manifest and Marketplace README
+            antigravity-skills/    # squaredup skill, loaded only by Antigravity
             assets/logo.png        # Antigravity Marketplace logo
             plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
             server.json            # MCP Registry entry (com.squaredup/us)
@@ -254,6 +255,7 @@ plugins/
   eu/       .mcp.json              # squaredup-eu -> eu.mcp.squaredup.com
             mcp_config.json        # the same server for Antigravity
             .antigravity-plugin/   # Antigravity manifest and Marketplace README
+            antigravity-skills/    # squaredup skill, loaded only by Antigravity
             assets/logo.png        # Antigravity Marketplace logo
             plugin.json, mcp.json  # the same plugin in Agent Plugins format, for Copilot CLI and VS Code
             server.json            # MCP Registry entry (com.squaredup/eu)

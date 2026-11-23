@@ -12,7 +12,7 @@ If your organization is hosted in the EU region, install `squaredup-eu` instead.
 ## What's included
 
 - **The SquaredUp MCP server** for the US region (`https://mcp.squaredup.com/mcp`). It signs in with your SquaredUp account in the browser, so there are no API keys to manage.
-- **Built-in guidance** - the server's `get_skill` tool walks your agent through SquaredUp tasks such as reading dashboards, querying data, and building tiles.
+- **Built-in guidance** - the server's `get_skill` tool walks your agent through SquaredUp tasks such as reading dashboards, querying data, and building tiles. The plugin's `squaredup` skill tells your agent to use it.
 
 ## Sign in
 
