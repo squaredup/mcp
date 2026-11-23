@@ -25,7 +25,7 @@ Sign in with your SquaredUp account and choose your organization if asked.
 
 ## Try it
 
-- "List my SquaredUp workspaces and summarize what each one monitors"
+- "Give me a quick overview of my SquaredUp workspaces"
 - "Find a service in my SquaredUp knowledge graph and show what it depends on"
 - "Build a SquaredUp dashboard that charts data from one of my integrations"
 
