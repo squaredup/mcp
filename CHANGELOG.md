@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the SquaredUp marketplace and its plugins are documented here. Each vendor's manifests follow [Semantic Versioning](https://semver.org) on their own, and US and EU always share a version:
+All notable changes to the SquaredUp marketplace and its plugins are documented here. Each vendor's manifests follow [Semantic Versioning](https://semver.org) on their own, and every region always shares a version:
 
 | Manifests | Read by | Bump when |
 | --- | --- | --- |
@@ -9,6 +9,18 @@ All notable changes to the SquaredUp marketplace and its plugins are documented 
 | `plugins/<region>/plugin.json` | GitHub Copilot CLI, VS Code, `github/awesome-copilot` | The Agent Plugins plugin changes |
 | `plugins/<region>/server.json` | MCP Registry | The registry entry changes; publishes on push to `main` |
 | `plugins/<region>/.m365-plugin/manifest.json` | Microsoft 365 Copilot | The package changes; released as `m365-v<version>` on push to `main` |
+
+## [1.3.0] - Unreleased
+
+### Added
+
+- **`au@squaredup`** (`1.3.0`) - AU region. Bundles the `squaredup-au` MCP server (`https://au.mcp.squaredup.com/mcp`) in every format the other regions ship: Claude Code, Agent Plugins, Antigravity (`squaredup-au`), the MCP Registry (`com.squaredup/au`), and a Microsoft 365 Copilot package. The Microsoft 365 package's OAuth registration ID is still a placeholder, so the `Release` workflow doesn't release `m365-v1.3.0` until it's filled in.
+
+### Changed
+
+- **`us@squaredup`** and **`eu@squaredup`** (`1.3.0`) - no change for installs; the version moves because every region shares one.
+- **Microsoft 365 `squaredup` skill** - asks which connector to use when more than one SquaredUp connector is connected, rather than only when both US and EU are.
+- **`Release` workflow** - checks, publishes, and packages `au` alongside `us` and `eu`.
 
 ## [1.2.1] - 2026-11-12
 

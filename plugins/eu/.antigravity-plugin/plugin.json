@@ -1,6 +1,6 @@
 {
     "$schema": "https://antigravity.google/schemas/v1/plugin.json",
     "name": "squaredup-eu",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "description": "Connect Antigravity to your SquaredUp organization in the EU region."
 }

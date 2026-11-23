@@ -1,0 +1,6 @@
+{
+    "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+    "name": "squaredup-au",
+    "version": "1.3.0",
+    "description": "Connect Antigravity to your SquaredUp organization in the AU region."
+}

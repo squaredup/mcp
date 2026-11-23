@@ -16,6 +16,11 @@
             "name": "eu",
             "source": "./plugins/eu",
             "category": "monitoring"
+        },
+        {
+            "name": "au",
+            "source": "./plugins/au",
+            "category": "monitoring"
         }
     ],
     "renames": {

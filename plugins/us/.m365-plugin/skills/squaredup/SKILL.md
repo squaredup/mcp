@@ -11,4 +11,4 @@ The SquaredUp connector serves its own skills, which give the steps and the rule
 2. Read the skill that covers the task by calling `get_skill` with its name in `names`.
 3. When a tool description tells you to read a skill, read it before you call the tool.
 
-There is one SquaredUp connector for each region. If both SquaredUp (US) and SquaredUp (EU) are connected, ask the user which one to use, and use only that connector for the task.
+There is one SquaredUp connector for each region. If more than one SquaredUp connector is connected, ask the user which one to use, and use only that connector for the task.
